@@ -169,4 +169,10 @@ fs.writeFileSync(path.join(out, 'running.ico'), ico(GREEN));
 fs.writeFileSync(path.join(out, 'stopped.ico'), ico(GRAY));
 fs.writeFileSync(path.join(out, 'app.png'), encodePng(64, drawIcon(64, GREEN)));
 
-console.log('Wrote running.ico, stopped.ico, app.png to', out);
+// Multi-size launcher/app icon (used as the PhotoServer.exe icon).
+fs.writeFileSync(
+  path.join(out, 'app.ico'),
+  buildIco([16, 32, 48].map((size) => ({ size, data: bmpIconImage(size, drawIcon(size, GREEN)) })))
+);
+
+console.log('Wrote running.ico, stopped.ico, app.ico, app.png to', out);
