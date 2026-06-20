@@ -3,7 +3,7 @@
 const path = require('path');
 const fs = require('fs');
 const fsp = require('fs/promises');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 
 const { load, save, CONFIG_FILE } = require('../../server/src/config');
 const { PhotoServer } = require('../../server/src/server');
@@ -169,8 +169,32 @@ async function main() {
     }
   }
 
+  // Open the dashboard as its OWN window: a chromeless Edge "app mode" window
+  // (no tabs, no address bar) so it looks like a standalone program rather than
+  // a browser tab. Falls back to Chrome, then the default browser.
+  function findBrowser() {
+    const edges = [
+      'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+      'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
+    ];
+    const chromes = [
+      'C:/Program Files/Google/Chrome/Application/chrome.exe',
+      'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
+    ];
+    return [...edges, ...chromes].find((p) => fs.existsSync(p)) || null;
+  }
+
   function openDashboard() {
-    exec(`cmd /c start "" "${CONTROL_URL}"`);
+    const browser = findBrowser();
+    if (browser) {
+      spawn(
+        browser,
+        [`--app=${CONTROL_URL}`, '--window-size=1180,820', '--window-position=120,80'],
+        { detached: true, stdio: 'ignore' }
+      ).unref();
+    } else {
+      exec(`cmd /c start "" "${CONTROL_URL}"`); // last resort: normal browser
+    }
   }
 
   async function quit() {
