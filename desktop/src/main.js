@@ -11,6 +11,7 @@ const { Storage } = require('../../server/src/storage');
 const { ActivityLog } = require('./activity-log');
 const { Notifier } = require('./notifications');
 const { Thumbnailer } = require('./gallery-store');
+const { TrashStore } = require('./trash-store');
 const { startControlServer } = require('./control-server');
 const { createTray } = require('./tray');
 const { pickFolder } = require('./folder-dialog');
@@ -55,9 +56,16 @@ async function main() {
   const activityLog = new ActivityLog();
   const notifier = new Notifier(prefs.notificationsEnabled !== false);
   const thumbnailer = new Thumbnailer(() => storage.root);
+  const trashStore = new TrashStore(() => storage.root);
+  await trashStore.init(); // loads + purges items past the 30-day window
 
   let tray = null;
   let autostartEnabled = await autostart.isEnabled();
+
+  // "Last received" time for the status line: newest stored item, updated live.
+  let lastUploadAt = 0;
+  for (const m of storage.list()) if (m.storedAt > lastUploadAt) lastUploadAt = m.storedAt;
+  let mirrorLastAt = 0;
 
   // ---- wire server events → log, notifications, tray ----------------------
   photoServer.on('log', ({ level, message }) => activityLog.add(level, message));
@@ -66,7 +74,9 @@ async function main() {
 
   let storedBatch = 0;
   let storedTimer = null;
-  photoServer.on('stored', () => {
+  photoServer.on('stored', ({ path: rel }) => {
+    lastUploadAt = Date.now();
+    mirrorCopy(rel); // also copy to the second drive, if configured
     storedBatch++;
     syncTrayThrottled();
     clearTimeout(storedTimer);
@@ -120,6 +130,52 @@ async function main() {
     syncTray();
   }
 
+  // ---- second-drive copy (mirror) -----------------------------------------
+  async function mirrorCopy(rel) {
+    if (!config.mirrorPath) return;
+    try {
+      const dst = path.join(config.mirrorPath, rel);
+      await fsp.mkdir(path.dirname(dst), { recursive: true });
+      await fsp.copyFile(path.join(storage.root, rel), dst);
+      mirrorLastAt = Date.now();
+    } catch (e) {
+      activityLog.add('warn', `Second-copy failed for ${rel}: ${e.message}`);
+    }
+  }
+
+  // Copy any files missing from the mirror (catch-up / verify).
+  async function mirrorSync() {
+    if (!config.mirrorPath) return { copied: 0, total: 0 };
+    let copied = 0;
+    const items = storage.list();
+    for (const m of items) {
+      const dst = path.join(config.mirrorPath, m.path);
+      if (!fs.existsSync(dst)) {
+        try {
+          await fsp.mkdir(path.dirname(dst), { recursive: true });
+          await fsp.copyFile(path.join(storage.root, m.path), dst);
+          copied++;
+        } catch (e) {
+          activityLog.add('warn', `Second-copy failed: ${e.message}`);
+        }
+      }
+    }
+    mirrorLastAt = Date.now();
+    activityLog.add('info', `Second copy updated (${copied} new file${copied === 1 ? '' : 's'})`);
+    return { copied, total: items.length };
+  }
+
+  function mirrorStatus() {
+    if (!config.mirrorPath) return { enabled: false };
+    const root = path.parse(config.mirrorPath).root;
+    return {
+      enabled: true,
+      path: config.mirrorPath,
+      connected: !root || fs.existsSync(root),
+      lastAt: mirrorLastAt,
+    };
+  }
+
   // ---- status for the dashboard -------------------------------------------
   async function getStatus() {
     const s = photoServer.stats();
@@ -153,6 +209,9 @@ async function main() {
       notificationsEnabled: notifier.enabled,
       notificationsAvailable: notifier.available,
       hasTray: tray !== null,
+      lastUploadAt,
+      trashCount: trashStore.count(),
+      mirror: mirrorStatus(),
     };
   }
 
@@ -236,19 +295,87 @@ async function main() {
     pickFolder: () => pickFolder(config.storagePath),
     getStorage: () => storage,
     thumbnailer,
+    // Delete = move to the recycle bin (restorable for 30 days).
     async deleteMedia(hashes) {
-      let deleted = 0;
+      const all = storage.list();
+      let trashed = 0;
       for (const h of hashes) {
-        if (await storage.remove(h)) {
-          await thumbnailer.forget(h);
-          deleted++;
+        const copies = all.filter((m) => m.hash === h);
+        if (copies.length === 0) continue;
+        for (const m of copies) {
+          await trashStore.add({
+            hash: m.hash, user: m.user, relPath: m.path,
+            name: m.name, size: m.size, takenAt: m.takenAt, type: m.type,
+          });
         }
+        await storage.remove(h); // index cleanup; files are already in .trash
+        await thumbnailer.forget(h);
+        trashed++;
       }
-      if (deleted > 0) {
-        activityLog.add('info', `Deleted ${deleted} item${deleted > 1 ? 's' : ''} from the backup`);
+      if (trashed > 0) {
+        activityLog.add('info', `Moved ${trashed} item${trashed > 1 ? 's' : ''} to Trash`);
         syncTray();
       }
-      return { deleted, fileCount: storage.count() };
+      return { deleted: trashed, fileCount: storage.count(), trashCount: trashStore.count() };
+    },
+    // ---- recycle bin -------------------------------------------------------
+    listTrash: () => trashStore.list(),
+    trashFile(id) {
+      const e = trashStore.get(id);
+      return e ? { id, abs: trashStore.absFile(id), name: e.name, type: e.type } : null;
+    },
+    async restoreMedia(ids) {
+      let restored = 0;
+      for (const id of ids) {
+        const e = trashStore.get(id);
+        if (!e) continue;
+        try {
+          await storage.store(fs.createReadStream(trashStore.absFile(id)), {
+            filename: e.name, takenAt: e.takenAt, username: e.user,
+          });
+          await thumbnailer.forget(e.hash);
+          await trashStore.deleteForever(id);
+          restored++;
+        } catch (err) {
+          activityLog.add('error', `Restore failed: ${err.message}`);
+        }
+      }
+      if (restored > 0) {
+        activityLog.add('info', `Restored ${restored} item${restored > 1 ? 's' : ''}`);
+        syncTray();
+      }
+      return { restored, fileCount: storage.count(), trashCount: trashStore.count() };
+    },
+    async deleteTrash(ids) {
+      let removed = 0;
+      for (const id of ids) if (await trashStore.deleteForever(id)) removed++;
+      if (removed > 0) activityLog.add('info', `Permanently deleted ${removed} item${removed > 1 ? 's' : ''}`);
+      return { removed, trashCount: trashStore.count() };
+    },
+    async emptyTrash() {
+      await trashStore.emptyAll();
+      activityLog.add('info', 'Emptied Trash');
+      return { trashCount: trashStore.count() };
+    },
+    // ---- second-drive copy -------------------------------------------------
+    async pickMirror() {
+      const folder = await pickFolder(config.mirrorPath || config.storagePath);
+      if (!folder) return { ...(await getStatus()), cancelled: true };
+      config.mirrorPath = path.resolve(folder);
+      persistConfig();
+      activityLog.add('info', `Second copy folder set to ${config.mirrorPath}`);
+      mirrorSync(); // catch up in the background
+      return getStatus();
+    },
+    async clearMirror() {
+      config.mirrorPath = '';
+      persistConfig();
+      activityLog.add('info', 'Second copy disabled');
+      return getStatus();
+    },
+    async mirrorNow() {
+      const r = await mirrorSync();
+      return { ...(await getStatus()), copied: r.copied };
     },
     async setServerRunning(shouldRun) {
       if (shouldRun && !photoServer.running) await safeStart();

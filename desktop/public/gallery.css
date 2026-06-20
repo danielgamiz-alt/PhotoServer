@@ -11,6 +11,20 @@
 /* ---- gallery layout ---- */
 #offlineBanner { margin: 12px; }
 #galleryView { padding: 8px 12px 60px; }
+#trashView { padding: 8px 12px 60px; }
+
+/* reassurance status line under the header */
+.status-strip {
+  padding: 8px 16px; font-size: 13.5px;
+  background: rgba(46, 160, 67, 0.10); color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.status-strip.warn { background: rgba(183, 121, 31, 0.14); }
+
+.trash-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 4px 10px;
+}
 .gallery-bar { display: flex; align-items: center; gap: 8px; padding: 12px 4px 4px; }
 .acct-select {
   font: inherit; font-size: 14px; font-weight: 600;

@@ -17,10 +17,14 @@
     </div>
     <nav class="tabs">
       <button id="tabPhotos" class="tab active">Photos</button>
+      <button id="tabTrash" class="tab">Trash</button>
       <button id="tabSettings" class="tab">Settings</button>
     </nav>
     <span id="statusPill" class="pill pill-gray">…</span>
   </header>
+
+  <!-- Always-visible reassurance line -->
+  <div id="statusStrip" class="status-strip hidden"></div>
 
   <!-- Selection action bar (shown when items are selected) -->
   <div id="selectionBar" class="selbar hidden">
@@ -50,6 +54,19 @@
       <div id="gallery"></div>
     </section>
 
+    <!-- ================= TRASH ================= -->
+    <section id="trashView" class="hidden">
+      <div class="trash-bar">
+        <span id="trashSelCount" class="muted small">Deleted photos stay here 30 days, then are removed automatically.</span>
+        <div class="selbar-spacer"></div>
+        <button id="trashRestore" class="btn" disabled>Restore</button>
+        <button id="trashDeleteForever" class="btn btn-danger" disabled>Delete forever</button>
+        <button id="trashEmpty" class="btn btn-ghost">Empty trash</button>
+      </div>
+      <p id="trashEmptyMsg" class="muted gallery-empty hidden">Trash is empty.</p>
+      <div id="trashGrid" class="day-grid"></div>
+    </section>
+
     <!-- ================= SETTINGS ================= -->
     <section id="settingsView" class="hidden settings-wrap">
       <!-- Phone connection -->
@@ -73,6 +90,24 @@
         <div class="btnrow">
           <button id="changeFolder" class="btn">Change folder…</button>
           <button id="openFolder" class="btn btn-ghost">Open folder</button>
+        </div>
+      </div>
+
+      <!-- Second copy (mirror) -->
+      <div class="card">
+        <h2>Second copy</h2>
+        <p class="muted small">Also copy every backed-up photo to another folder or drive, so your backup itself is backed up.</p>
+        <div id="mirrorOff">
+          <button id="mirrorPick" class="btn">Choose a second folder…</button>
+        </div>
+        <div id="mirrorOn" class="hidden">
+          <div class="pathrow"><code id="mirrorPath">—</code></div>
+          <p id="mirrorStatusText" class="muted small">—</p>
+          <div class="btnrow">
+            <button id="mirrorSync" class="btn">Copy now</button>
+            <button id="mirrorChange" class="btn btn-ghost">Change…</button>
+            <button id="mirrorClear" class="btn btn-ghost">Turn off</button>
+          </div>
         </div>
       </div>
 
