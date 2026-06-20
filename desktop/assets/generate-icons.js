@@ -170,9 +170,13 @@ fs.writeFileSync(path.join(out, 'stopped.ico'), ico(GRAY));
 fs.writeFileSync(path.join(out, 'app.png'), encodePng(64, drawIcon(64, GREEN)));
 
 // Multi-size launcher/app icon (used as the PhotoServer.exe icon).
-fs.writeFileSync(
-  path.join(out, 'app.ico'),
-  buildIco([16, 32, 48].map((size) => ({ size, data: bmpIconImage(size, drawIcon(size, GREEN)) })))
-);
+const appIco = buildIco([16, 32, 48].map((size) => ({ size, data: bmpIconImage(size, drawIcon(size, GREEN)) })));
+fs.writeFileSync(path.join(out, 'app.ico'), appIco);
 
-console.log('Wrote running.ico, stopped.ico, app.ico, app.png to', out);
+// Favicon for the dashboard — this becomes the app-window/taskbar icon when
+// the dashboard is opened as its own Edge "app mode" window.
+const publicDir = path.join(out, '..', 'public');
+fs.writeFileSync(path.join(publicDir, 'favicon.png'), encodePng(64, drawIcon(64, GREEN)));
+fs.writeFileSync(path.join(publicDir, 'favicon.ico'), appIco);
+
+console.log('Wrote running.ico, stopped.ico, app.ico, app.png + public/favicon.* ');
