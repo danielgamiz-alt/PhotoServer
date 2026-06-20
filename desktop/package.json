@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/main.js",
     "build-icons": "node assets/generate-icons.js",
-    "test": "node test/control-test.js"
+    "package": "powershell -NoProfile -File build-portable.ps1",
+    "test": "node test/control-test.js && node test/gallery-test.js"
   },
   "dependencies": {
     "node-notifier": "^10.0.1",
