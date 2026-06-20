@@ -106,6 +106,48 @@ async function route(req, res, deps) {
     return sendJson(res, 200, await deps.deleteMedia(body.hashes));
   }
 
+  // ---- recycle bin ---------------------------------------------------------
+  if (p === '/api/trash' && req.method === 'GET') {
+    return sendJson(res, 200, { items: deps.listTrash() });
+  }
+
+  if ((p === '/media/trash-thumb' || p === '/media/trash-file') && req.method === 'GET') {
+    const t = deps.trashFile(url.searchParams.get('id'));
+    if (!t) return sendJson(res, 404, { error: 'not found' });
+    if (p === '/media/trash-thumb') {
+      const thumb = await deps.thumbnailer.thumb(t.id, t.abs, t.type);
+      if (thumb) return serveFile(req, res, thumb, 'image/jpeg');
+    }
+    return serveFile(req, res, t.abs, mimeFor(t.name));
+  }
+
+  if (p === '/api/trash/restore' && req.method === 'POST') {
+    const body = await readJson(req);
+    if (!Array.isArray(body.ids) || body.ids.length === 0) throw httpError(400, 'ids required');
+    return sendJson(res, 200, await deps.restoreMedia(body.ids));
+  }
+
+  if (p === '/api/trash/delete' && req.method === 'POST') {
+    const body = await readJson(req);
+    if (!Array.isArray(body.ids) || body.ids.length === 0) throw httpError(400, 'ids required');
+    return sendJson(res, 200, await deps.deleteTrash(body.ids));
+  }
+
+  if (p === '/api/trash/empty' && req.method === 'POST') {
+    return sendJson(res, 200, await deps.emptyTrash());
+  }
+
+  // ---- second-drive copy ---------------------------------------------------
+  if (p === '/api/mirror/pick' && req.method === 'POST') {
+    return sendJson(res, 200, await deps.pickMirror());
+  }
+  if (p === '/api/mirror/clear' && req.method === 'POST') {
+    return sendJson(res, 200, await deps.clearMirror());
+  }
+  if (p === '/api/mirror/sync' && req.method === 'POST') {
+    return sendJson(res, 200, await deps.mirrorNow());
+  }
+
   if (p === '/api/settings' && req.method === 'POST') {
     const body = await readJson(req);
     const patch = {};
