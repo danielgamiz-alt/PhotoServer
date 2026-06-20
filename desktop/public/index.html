@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PhotoServer</title>
+  <link rel="icon" href="/favicon.png" />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/gallery.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="logo"></span>
+      <h1>PhotoServer</h1>
+    </div>
+    <nav class="tabs">
+      <button id="tabPhotos" class="tab active">Photos</button>
+      <button id="tabSettings" class="tab">Settings</button>
+    </nav>
+    <span id="statusPill" class="pill pill-gray">…</span>
+  </header>
+
+  <!-- Selection action bar (shown when items are selected) -->
+  <div id="selectionBar" class="selbar hidden">
+    <button id="selCancel" class="selbar-btn" title="Clear selection">✕</button>
+    <span id="selCount">0</span>
+    <span class="muted small">selected</span>
+    <div class="selbar-spacer"></div>
+    <button id="selDelete" class="btn btn-danger">Delete</button>
+  </div>
+
+  <main>
+    <div id="offlineBanner" class="warning hidden">
+      ⚠ <b>Not connected to the PhotoServer app.</b>
+      This page can't reach the app — it may not be running.
+      Start it from the system-tray icon, or launch it again
+      (<code>npm start</code> in the <code>desktop</code> folder).
+      This page will reconnect automatically.
+    </div>
+
+    <!-- ================= PHOTOS ================= -->
+    <section id="galleryView">
+      <div id="galleryBar" class="gallery-bar hidden">
+        <span class="muted small">Showing</span>
+        <select id="accountSelect" class="acct-select"></select>
+      </div>
+      <p id="galleryEmpty" class="muted gallery-empty hidden">No photos backed up yet. Once your phone uploads, they'll appear here.</p>
+      <div id="gallery"></div>
+    </section>
+
+    <!-- ================= SETTINGS ================= -->
+    <section id="settingsView" class="hidden settings-wrap">
+      <!-- Phone connection -->
+      <div class="card">
+        <h2>Connect your phone</h2>
+        <p class="muted">In the PhotoSync app, tap <b>Find server</b> — or enter this address manually:</p>
+        <div class="urlrow">
+          <code id="phoneUrl">—</code>
+          <button id="copyUrl" class="btn btn-ghost" title="Copy">Copy</button>
+        </div>
+        <p class="muted small">Your phone must be on the same WiFi as this PC.</p>
+      </div>
+
+      <!-- Storage -->
+      <div class="card">
+        <h2>Backup location</h2>
+        <div id="driveWarning" class="warning hidden">⚠ The backup drive isn't connected. Photos can't be saved until it's plugged in.</div>
+        <div class="pathrow"><code id="storagePath">—</code></div>
+        <div class="diskbar"><div id="diskUsed" class="diskbar-fill"></div></div>
+        <p id="diskText" class="muted small">—</p>
+        <div class="btnrow">
+          <button id="changeFolder" class="btn">Change folder…</button>
+          <button id="openFolder" class="btn btn-ghost">Open folder</button>
+        </div>
+      </div>
+
+      <!-- Server control -->
+      <div class="card">
+        <h2>Server</h2>
+        <div class="statgrid">
+          <div><div class="statnum" id="photoCount">—</div><div class="muted small">photos backed up</div></div>
+          <div><div class="statnum" id="serverState">—</div><div class="muted small">status</div></div>
+        </div>
+        <div class="btnrow"><button id="toggleServer" class="btn">—</button></div>
+      </div>
+
+      <!-- Settings -->
+      <div class="card">
+        <h2>Settings</h2>
+        <label class="field">
+          <span>Server name <span class="muted small">(what phones show)</span></span>
+          <input id="serverName" type="text" />
+        </label>
+        <label class="field">
+          <span>API key <span class="muted small">(optional password for phones)</span></span>
+          <input id="apiKey" type="text" placeholder="leave blank for none" />
+        </label>
+        <details>
+          <summary class="muted small">Advanced</summary>
+          <label class="field"><span>Port</span><input id="port" type="number" min="1" max="65535" /></label>
+        </details>
+        <div class="btnrow">
+          <button id="saveSettings" class="btn">Save settings</button>
+          <span id="saveHint" class="muted small"></span>
+        </div>
+        <hr />
+        <label class="toggle"><input id="autostart" type="checkbox" /><span>Start automatically when I log in</span></label>
+        <label class="toggle"><input id="notifications" type="checkbox" /><span>Show desktop notifications</span></label>
+        <p id="notifyUnavailable" class="muted small hidden">Notifications need the <code>node-notifier</code> package.</p>
+      </div>
+
+      <!-- Activity -->
+      <div class="card">
+        <h2>Recent activity</h2>
+        <ul id="activity" class="activity"></ul>
+      </div>
+
+      <div class="footer">
+        <button id="quit" class="btn btn-danger">Quit PhotoServer</button>
+        <p class="muted small">Quitting stops backups until you start the app again.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Full-screen viewer -->
+  <div id="lightbox" class="lightbox hidden">
+    <button id="lbClose" class="lb-btn lb-close" title="Close (Esc)">✕</button>
+    <button id="lbPrev" class="lb-btn lb-prev" title="Previous (←)">‹</button>
+    <div id="lbStage" class="lb-stage"></div>
+    <button id="lbNext" class="lb-btn lb-next" title="Next (→)">›</button>
+    <button id="lbDelete" class="lb-btn lb-delete" title="Delete">Delete</button>
+  </div>
+
+  <script src="/app.js"></script>
+  <script src="/gallery.js"></script>
+</body>
+</html>

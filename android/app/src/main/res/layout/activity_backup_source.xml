@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RadioGroup
+        android:id="@+id/modeGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp">
+
+        <RadioButton
+            android:id="@+id/modeCamera"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/mode_camera" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/mode_camera_desc"
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <RadioButton
+            android:id="@+id/modeAll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/mode_all" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/mode_all_desc"
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <RadioButton
+            android:id="@+id/modeCustom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/mode_custom" />
+    </RadioGroup>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="?android:attr/listDivider" />
+
+    <TextView
+        android:id="@+id/foldersHint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="12dp"
+        android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/folderList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="16dp" />
+
+        <TextView
+            android:id="@+id/foldersEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="32dp"
+            android:text="@string/folders_empty"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:visibility="gone" />
+    </FrameLayout>
+
+</LinearLayout>

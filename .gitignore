@@ -1,0 +1,23 @@
+# Server runtime files
+server/config.json
+server/.server-id
+server/photos/
+server/node_modules/
+server/desktop-prefs.json
+
+# Desktop app
+desktop/node_modules/
+desktop/dist/
+desktop/build/
+
+# Build / logs
+*.log
+build-log.txt
+
+# Android build output
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.apk

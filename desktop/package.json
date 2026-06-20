@@ -1,0 +1,19 @@
+{
+  "name": "photoserver-desktop",
+  "version": "0.1.0",
+  "description": "System-tray desktop app for PhotoServer (Windows): dashboard, background operation, auto-start, notifications.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "build-icons": "node assets/generate-icons.js",
+    "test": "node test/control-test.js"
+  },
+  "dependencies": {
+    "node-notifier": "^10.0.1",
+    "systray2": "^2.0.3"
+  },
+  "optionalDependencies": {
+    "sharp": "^0.33.5"
+  },
+  "license": "MIT"
+}

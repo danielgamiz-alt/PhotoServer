@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewerPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Top chrome: back button + date/filename. Toggled by tapping the photo. -->
+    <LinearLayout
+        android:id="@+id/viewerTopBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/viewer_topbar_scrim"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="4dp"
+        android:paddingTop="28dp"
+        android:paddingBottom="12dp">
+
+        <ImageButton
+            android:id="@+id/viewerBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/back"
+            android:src="@drawable/ic_arrow_back" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp">
+
+            <TextView
+                android:id="@+id/viewerDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/viewerName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:singleLine="true"
+                android:textColor="#CCFFFFFF"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

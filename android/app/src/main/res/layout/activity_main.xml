@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/summaryText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/photoGrid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:padding="1px"
+                android:scrollbars="none" />
+
+            <!-- Single shared preview surface, moved over the active video
+                 cell while scrolling. Sized/positioned in code. -->
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/previewPlayer"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:visibility="gone" />
+
+            <!-- Duration chip drawn over the preview (the cell's own chip is
+                 hidden behind the player surface). Sized/positioned in code to
+                 match the active cell; bottom-right like Google Photos. -->
+            <FrameLayout
+                android:id="@+id/previewChipContainer"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|end"
+                    android:layout_margin="4dp"
+                    android:background="@drawable/video_chip_bg"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="5dp"
+                    android:paddingVertical="2dp">
+
+                    <ImageView
+                        android:layout_width="11dp"
+                        android:layout_height="11dp"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_video_mark" />
+
+                    <TextView
+                        android:id="@+id/previewDurationText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="3dp"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Floating date indicator that tracks the scroll position -->
+            <TextView
+                android:id="@+id/datePill"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|center_horizontal"
+                android:layout_marginTop="8dp"
+                android:alpha="0"
+                android:background="@drawable/date_pill_bg"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="6dp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/emptyText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:padding="32dp"
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:visibility="gone" />
+        </FrameLayout>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+</LinearLayout>

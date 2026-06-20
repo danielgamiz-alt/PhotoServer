@@ -1,0 +1,145 @@
+:root {
+  --bg: #f4f5f7;
+  --card: #ffffff;
+  --text: #1d2127;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --accent: #1a73e8;
+  --green: #2ea043;
+  --gray: #8c9299;
+  --danger: #d93025;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171c;
+    --card: #1e2127;
+    --text: #e6e8eb;
+    --muted: #9aa0a6;
+    --border: #2c3038;
+    --shadow: none;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand h1 { font-size: 20px; margin: 0; }
+.logo {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: inset 0 0 0 4px #fff, inset 0 0 0 7px var(--green);
+}
+
+/* Full-width so the gallery fills the screen. The Settings panel re-centers
+   itself with its own max-width (.settings-wrap). */
+main {
+  padding: 0;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+}
+.card h2 { margin: 0 0 12px; font-size: 16px; }
+
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.hidden { display: none !important; }
+
+.pill {
+  font-size: 13px; font-weight: 600;
+  padding: 4px 12px; border-radius: 999px; color: #fff;
+}
+.pill-green { background: var(--green); }
+.pill-gray { background: var(--gray); }
+
+code {
+  font-family: "Cascadia Code", Consolas, monospace;
+  background: rgba(127, 127, 127, 0.12);
+  padding: 2px 6px; border-radius: 6px;
+  word-break: break-all;
+}
+
+.urlrow, .pathrow { display: flex; align-items: center; gap: 8px; }
+.urlrow code { font-size: 17px; font-weight: 600; flex: 1; }
+.pathrow code { flex: 1; }
+
+.diskbar {
+  height: 8px; background: rgba(127,127,127,0.18);
+  border-radius: 999px; overflow: hidden; margin: 12px 0 6px;
+}
+.diskbar-fill { height: 100%; width: 0; background: var(--accent); transition: width .4s; }
+
+.statgrid { display: flex; gap: 32px; margin-bottom: 14px; }
+.statnum { font-size: 28px; font-weight: 700; }
+
+.btnrow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.btn {
+  font: inherit; font-weight: 600; font-size: 14px;
+  border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  padding: 9px 16px; border-radius: 8px; cursor: pointer;
+}
+.btn:hover { filter: brightness(1.05); }
+.btn:active { transform: translateY(1px); }
+.btn-ghost { background: transparent; color: var(--accent); }
+.btn-danger { background: var(--danger); border-color: var(--danger); }
+
+.field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+.field span { font-size: 14px; }
+.field input {
+  font: inherit; padding: 9px 11px;
+  border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); color: var(--text);
+}
+details { margin-bottom: 12px; }
+summary { cursor: pointer; }
+
+hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+.toggle { display: flex; align-items: center; gap: 10px; margin: 10px 0; cursor: pointer; }
+.toggle input { width: 18px; height: 18px; }
+
+.warning {
+  background: rgba(217, 48, 37, 0.1);
+  color: var(--danger);
+  border: 1px solid rgba(217, 48, 37, 0.3);
+  padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; font-size: 14px;
+}
+
+.activity { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow-y: auto; }
+.activity li {
+  display: flex; gap: 10px; padding: 6px 0;
+  border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.activity li:last-child { border-bottom: none; }
+.activity .t { color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.activity .m { flex: 1; }
+.activity .lvl-error .m { color: var(--danger); }
+.activity .lvl-warn .m { color: #b7791f; }
+
+.footer { text-align: center; margin-top: 8px; }
