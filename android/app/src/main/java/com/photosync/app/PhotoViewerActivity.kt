@@ -1,0 +1,99 @@
+package com.photosync.app
+
+import android.os.Bundle
+import android.view.View
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.viewpager2.widget.ViewPager2
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+/**
+ * Full-screen, swipeable photo/video viewer (Google-Photos-style "open" view).
+ * Videos play in-app with sound and controls; swiping to another page stops
+ * playback. The media list is handed over via [GalleryData] to avoid
+ * serializing it through the Intent. No sharing or editing — view only.
+ */
+@OptIn(UnstableApi::class)
+class PhotoViewerActivity : AppCompatActivity() {
+
+    private lateinit var pager: ViewPager2
+    private lateinit var topBar: View
+    private lateinit var dateText: TextView
+    private lateinit var nameText: TextView
+    private lateinit var adapter: ViewerPagerAdapter
+    private var player: ExoPlayer? = null
+
+    private var items: List<MediaItem> = emptyList()
+    private var chromeVisible = true
+
+    private val headerFormat = SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault())
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_photo_viewer)
+
+        items = GalleryData.items
+        if (items.isEmpty()) {
+            finish()
+            return
+        }
+        val startIndex = intent.getIntExtra(EXTRA_INDEX, 0).coerceIn(0, items.size - 1)
+
+        pager = findViewById(R.id.viewerPager)
+        topBar = findViewById(R.id.viewerTopBar)
+        dateText = findViewById(R.id.viewerDate)
+        nameText = findViewById(R.id.viewerName)
+
+        findViewById<View>(R.id.viewerBack).setOnClickListener { finish() }
+
+        player = ExoPlayer.Builder(this).build()
+        adapter = ViewerPagerAdapter(items = items, player = player!!, onTap = ::toggleChrome)
+        pager.adapter = adapter
+        pager.setCurrentItem(startIndex, false)
+        pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                adapter.stopPlayback() // leaving a video stops it
+                updateChrome(position)
+            }
+        })
+        updateChrome(startIndex)
+    }
+
+    private fun updateChrome(position: Int) {
+        val item = items.getOrNull(position) ?: return
+        dateText.text = headerFormat.format(Date(item.takenAtMs))
+        nameText.text = item.displayName
+    }
+
+    private fun toggleChrome() {
+        chromeVisible = !chromeVisible
+        topBar.animate().alpha(if (chromeVisible) 1f else 0f).setDuration(150).start()
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        if (chromeVisible) {
+            controller.show(WindowInsetsCompat.Type.statusBars())
+        } else {
+            controller.hide(WindowInsetsCompat.Type.statusBars())
+        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (::adapter.isInitialized) adapter.stopPlayback()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        player?.release()
+        player = null
+    }
+
+    companion object {
+        const val EXTRA_INDEX = "index"
+    }
+}

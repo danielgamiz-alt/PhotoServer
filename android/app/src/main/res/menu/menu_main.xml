@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Both items live in the overflow menu (the default for icon-less
+         items), so no showAsAction attribute is needed. -->
+    <item
+        android:id="@+id/action_sync_now"
+        android:title="@string/sync_now" />
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/menu_settings" />
+</menu>

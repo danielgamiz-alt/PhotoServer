@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PhotoSync</string>
+
+    <string name="section_server">Server</string>
+    <string name="server_url_hint">Server URL (e.g. http://192.168.1.50:8420)</string>
+    <string name="api_key_hint">API key (leave empty if not set)</string>
+    <string name="find_server">Find server</string>
+    <string name="test_connection">Test</string>
+    <string name="not_connected">Not connected yet</string>
+    <string name="searching">Searching for servers on this WiFi…</string>
+    <string name="no_servers_found">No server found. Is it running and on the same WiFi?</string>
+    <string name="pick_server">Pick a server</string>
+    <string name="found_server">Found \"%1$s\" at %2$s</string>
+    <string name="api_key_required">This server requires an API key — enter it above.</string>
+    <string name="testing">Testing…</string>
+    <string name="server_online">Online: \"%1$s\" (%2$d files stored)</string>
+    <string name="server_unreachable">Server unreachable</string>
+    <string name="enter_url_first">Enter or discover a server URL first</string>
+
+    <string name="section_sync">Sync</string>
+    <string name="auto_sync_label">Auto-upload when on WiFi</string>
+    <string name="include_videos_label">Include videos</string>
+    <string name="sync_now">Sync now</string>
+    <string name="sync_queued">Sync started (runs when WiFi is available)</string>
+    <string name="auto_sync_on">Auto-sync enabled — runs every 15 min on WiFi</string>
+    <string name="never_synced">Never synced</string>
+    <string name="last_sync">Last sync: %1$s</string>
+    <string name="total_uploaded">Total uploaded from this phone: %1$d</string>
+
+    <string name="permission_granted">Photo access granted</string>
+    <string name="permission_needed">PhotoSync needs photo access to back up your pictures</string>
+
+    <string name="menu_settings">Settings</string>
+    <string name="backed_up_summary">%1$d of %2$d backed up</string>
+    <string name="gallery_empty">No photos found on this device</string>
+    <string name="configure_server_first">Set up your server in Settings first</string>
+    <string name="status_done">Backed up</string>
+    <string name="status_uploading">Uploading…</string>
+    <string name="status_pending">Not backed up yet</string>
+
+    <string name="back">Back</string>
+    <string name="photo">Photo</string>
+    <string name="play_video">Play video</string>
+
+    <!-- Account -->
+    <string name="section_account">Account</string>
+    <string name="username_hint">Your name (e.g. Alex)</string>
+    <string name="account_hint">Your photos are backed up to their own folder on the server, under this name. Each person in your household can use their own name.</string>
+    <string name="set_name_first">Enter your name in Settings first</string>
+
+    <!-- Backup source -->
+    <string name="section_backup_source">What to back up</string>
+    <string name="backup_source_title">What to back up</string>
+    <string name="choose_folders">Choose…</string>
+    <string name="mode_camera">Camera Roll</string>
+    <string name="mode_camera_desc">Photos and videos taken with your camera (the DCIM folder). Recommended.</string>
+    <string name="mode_all">Entire gallery</string>
+    <string name="mode_all_desc">Every photo and video folder on this device.</string>
+    <string name="mode_custom">Selected folders</string>
+    <string name="folders_pick_hint">Tap folders to include in your backup:</string>
+    <string name="folders_reference_hint">Your folders (choose \"Selected folders\" above to pick):</string>
+    <string name="folders_empty">No folders found on this device</string>
+    <string name="folder_camera_label">%1$s · Camera roll</string>
+    <string name="backup_camera_summary">Camera Roll</string>
+    <string name="backup_all_summary">Entire gallery</string>
+
+    <plurals name="folder_item_count">
+        <item quantity="one">%d item</item>
+        <item quantity="other">%d items</item>
+    </plurals>
+    <plurals name="backup_custom_summary">
+        <item quantity="one">%d folder</item>
+        <item quantity="other">%d folders</item>
+    </plurals>
+</resources>
