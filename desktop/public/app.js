@@ -116,7 +116,7 @@ function renderStatusStrip(s) {
     const stale = s.lastUploadAt && Date.now() - s.lastUploadAt > 3 * 86400000;
     if (stale) {
       warn = true;
-      text = `⚠ ${s.fileCount.toLocaleString()} photos backed up — but nothing new in ${fmtAgo(s.lastUploadAt)}. Is your phone on and syncing?`;
+      text = `⚠ ${s.fileCount.toLocaleString()} photos backed up — but nothing new in ${fmtAgo(s.lastUploadAt)}.`;
     } else {
       text = `✓ ${s.fileCount.toLocaleString()} photos backed up · last received ${fmtAgo(s.lastUploadAt)}`;
     }
