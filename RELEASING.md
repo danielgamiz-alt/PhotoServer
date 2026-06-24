@@ -85,9 +85,14 @@ git tag v0.2.0
 git push origin v0.2.0
 ```
 
-GitHub Actions then builds the signed APK, names it `PhotoSync-v0.2.0.apk`, and
-publishes a Release with auto-generated notes. Watch it under the repo's
-**Actions** tab; the finished APK appears under **Releases**.
+GitHub Actions then builds **two** downloads and attaches both to one Release:
+
+- `PhotoSync-v0.2.0.apk` — the signed Android app (the `build` job).
+- `PhotoSync-Server-Windows-v0.2.0.zip` — the portable Windows server: a
+  self-contained folder (bundled Node + `PhotoServer.exe`) that family extract
+  and double-click, no install or Node needed (the `windows-server` job).
+
+Watch it under the repo's **Actions** tab; both files appear under **Releases**.
 
 Notes:
 - The tag *is* the version — `v0.2.0` becomes versionName `0.2.0`. You don't
@@ -107,19 +112,28 @@ attach `android/app/build/outputs/apk/release/app-release.apk`.
 
 ## What you send friends & family
 
-Send them the **release page** (e.g. `https://github.com/<you>/PhotoServer/releases/latest`)
-or a QR code that points to it. On their phone:
+The landing page at **`docs/index.html`** (GitHub Pages) already walks through
+both halves with steps and a QR code — sending that link is the easiest option.
+PhotoSync needs **two** things set up, and the computer comes first:
 
-1. Tap the link → tap the `app-release.apk` to download it.
-2. Open the downloaded file. Android says *"can't install from unknown
-   source"* → tap **Settings** → enable **Allow from this source** → back.
-3. If **Play Protect** warns ("unsafe app"), tap **More details → Install
-   anyway**. (This is normal for any app not distributed through the Play Store.)
-4. Open **PhotoSync**, grant photo access, and follow the in-app setup.
+**1. The home computer (do this once):**
+1. On the household Windows PC, open the release page and download
+   `PhotoSync-Server-Windows-….zip`.
+2. Right-click the zip → **Extract All**, keep the folder together (e.g. in
+   Documents), and double-click **PhotoServer**.
+3. If Windows shows *"Windows protected your PC"*, click **More info → Run
+   anyway** (normal for free apps outside the Store).
+4. In the dashboard that opens, click **Browse…** and pick where photos are
+   stored. Done — it now **starts automatically on every restart** and runs in
+   the background (a green icon by the clock).
 
-> Tip: a one-page install guide with screenshots of steps 2–3 removes almost all
-> the confusion. Once your repo exists, ask me to generate a QR code and a small
-> GitHub Pages landing page ("Download for Android" + those screenshots).
+**2. Each phone:**
+1. Open the release page → download the `PhotoSync-….apk`.
+2. Android says *"unknown source"* → **Settings** → enable **Allow from this
+   source** → back.
+3. If **Play Protect** warns, tap **More details → Install anyway**.
+4. Open **PhotoSync**, grant photo access, and on the same home Wi-Fi tap
+   **Find server** — it discovers the computer automatically.
 
 ---
 

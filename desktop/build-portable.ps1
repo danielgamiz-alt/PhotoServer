@@ -49,16 +49,32 @@ Copy-Item (Join-Path $desktop "node_modules") (Join-Path $deskDst "node_modules"
 
 # 6. A short readme for the folder
 @"
-PhotoServer (portable)
+PhotoSync Server (for your computer)
 
-Double-click PhotoServer.exe to start. Your photo dashboard opens in your
-browser, a green icon appears in the system tray (bottom-right), and the
-backup server runs in the background.
+SETUP (one time, about a minute):
+ 1. Keep this whole folder together (for example in Documents). Don't run it
+    from inside the .zip.
+ 2. Double-click PhotoServer.exe.
+    - If Windows shows a blue "Windows protected your PC" box, click
+      "More info" then "Run anyway". (Normal for free apps not from the Store.)
+ 3. A dashboard opens in your browser and a green icon appears by the clock
+    (bottom-right). Click "Browse..." and choose where to keep your photos
+    (an external drive is ideal), then you're done.
 
-First run: open Settings and set your backup folder (e.g. an external SSD).
-Quit any time from the tray icon. Keep all files in this folder together.
+That's it. PhotoSync now starts by itself every time you turn the computer on
+and runs quietly in the background -- you don't need to open anything. Your
+phone backs up whenever it's on the same home Wi-Fi and this computer is on.
+
+To quit or change settings, use the green icon by the clock.
 "@ | Set-Content (Join-Path $dist "READ ME.txt") -Encoding utf8
 
 # 7. Report size
 $size = [math]::Round((Get-ChildItem $dist -Recurse | Measure-Object Length -Sum).Sum / 1MB, 0)
 Write-Host "Done -> $dist  (${size} MB)" -ForegroundColor Green
+
+# 8. Zip it up — a single file to hand to family (extract, double-click).
+#    The archive contains a top-level PhotoServer\ folder so extraction is tidy.
+$zip = Join-Path (Split-Path $dist -Parent) "PhotoServer-Windows.zip"
+if (Test-Path $zip) { Remove-Item $zip -Force }
+Compress-Archive -Path $dist -DestinationPath $zip
+Write-Host "Zipped -> $zip" -ForegroundColor Green

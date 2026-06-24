@@ -62,6 +62,16 @@ async function main() {
   let tray = null;
   let autostartEnabled = await autostart.isEnabled();
 
+  // First launch: turn on "start at login" automatically so a non-technical
+  // user gets background backups on every restart without having to find the
+  // toggle. Only done once — if they later switch it off, we won't re-enable
+  // it (autostartInitialized stays true).
+  if (!prefs.autostartInitialized) {
+    if (!autostartEnabled && (await autostart.enable())) autostartEnabled = true;
+    prefs.autostartInitialized = true;
+    savePrefs(prefs);
+  }
+
   // "Last received" time for the status line: newest stored item, updated live.
   let lastUploadAt = 0;
   for (const m of storage.list()) if (m.storedAt > lastUploadAt) lastUploadAt = m.storedAt;
