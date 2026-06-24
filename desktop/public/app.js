@@ -65,7 +65,7 @@ function setConnected(isConnected) {
     // Keep the reassurance line visible — an empty/hidden strip is itself
     // ambiguous. Tell the user plainly that we can't reach the app.
     const strip = $('statusStrip');
-    strip.textContent = "⚠ Can't reach the PhotoServer app — it may not be running.";
+    strip.textContent = "⚠ Can't reach PhotoSync Server — it may not be running.";
     strip.className = 'status-strip warn';
   }
 }
@@ -279,9 +279,9 @@ $('mirrorSync').onclick = async () => {
 };
 
 $('quit').onclick = action(async () => {
-  if (!confirm('Quit PhotoServer? Backups will stop until you start it again.')) return;
+  if (!confirm('Quit PhotoSync Server? Backups will stop until you start it again.')) return;
   await api('/api/quit', 'POST').catch(() => {});
-  document.body.innerHTML = '<main><section class="card"><h2>PhotoServer has quit</h2>' +
+  document.body.innerHTML = '<main><section class="card"><h2>PhotoSync Server has quit</h2>' +
     '<p class="muted">You can close this tab. Start the app again to resume backups.</p></section></main>';
 });
 
