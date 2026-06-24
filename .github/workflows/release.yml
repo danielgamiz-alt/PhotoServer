@@ -1,8 +1,9 @@
-name: Release Android APK
+name: Release (Android app + Windows server)
 
-# Builds and signs the PhotoSync APK on GitHub's runners whenever you push a
-# version tag (e.g. v0.2.0), then attaches it to a GitHub Release. No local
-# Android Studio build needed.
+# On a version tag (e.g. v0.2.0) this builds two downloads and attaches both to
+# one GitHub Release — no local builds needed:
+#   - the signed PhotoSync Android APK            (build job)
+#   - the portable PhotoSync Server for Windows   (windows-server job)
 #
 # Required repository secrets (Settings -> Secrets and variables -> Actions):
 #   KEYSTORE_BASE64    - base64 of android/photosync-release.jks
@@ -73,3 +74,36 @@ jobs:
         if: always()
         working-directory: android
         run: rm -f photosync-release.jks keystore.properties
+
+  # The Windows server download: builds the portable folder (bundled Node +
+  # PhotoServer.exe launcher), zips it, and attaches it to the same Release.
+  # No secrets needed — the server isn't signed (users get a one-time
+  # SmartScreen "Run anyway", same as the APK's Play Protect prompt).
+  windows-server:
+    runs-on: windows-latest
+    needs: build            # attach to the Release the build job creates
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm ci
+
+      - name: Build portable server (folder + zip)
+        working-directory: desktop
+        run: npm run package
+
+      - name: Name the zip after the tag
+        shell: pwsh
+        run: Copy-Item desktop/dist/PhotoServer-Windows.zip "PhotoSync-Server-Windows-${{ github.ref_name }}.zip"
+
+      - name: Attach to the Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: PhotoSync-Server-Windows-${{ github.ref_name }}.zip
+          fail_on_unmatched_files: true

@@ -1,8 +1,7 @@
 'use strict';
 
 // Headless CLI entry point. Thin wrapper around the PhotoServer module so the
-// same server logic powers both this (and the Raspberry Pi systemd service)
-// and the desktop tray app.
+// same server logic powers both this and the desktop tray app.
 
 const { load } = require('./config');
 const { PhotoServer } = require('./server');
