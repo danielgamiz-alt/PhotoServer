@@ -9,6 +9,13 @@ backup folder, see status, and change settings.
 
 ## Run it
 
+**End users don't run it from source.** They download the portable
+`PhotoSync-Server-Windows-*.zip` from the GitHub Release, extract it, and
+double-click `PhotoServer.exe` — no Node, no install. See
+[RELEASING.md](../RELEASING.md) and `npm run package` below.
+
+For development:
+
 ```
 cd desktop
 npm install      # one time: installs the tray + notifier helpers
@@ -19,6 +26,11 @@ A green icon appears in your system tray (bottom-right, by the clock) and the
 dashboard opens in your browser. Closing the browser tab does **not** stop
 backups — only **Quit** (from the tray menu or the dashboard) does.
 
+On the **first run**, "Start automatically when I log in" is turned **on by
+default** (a per-user registry key, no admin) so backups resume on every
+restart without the user touching anything. If they switch it off, it stays
+off — it's only auto-enabled once.
+
 ## What you get
 
 - **Tray icon** — green when the server is running, gray when stopped. Right-click
@@ -26,14 +38,14 @@ backups — only **Quit** (from the tray menu or the dashboard) does.
 - **Dashboard** (`http://127.0.0.1:8421`) — the address to type into phones, a
   **Browse…** button to choose the backup folder (with free-space and
   "drive not connected" warnings), photo count, start/stop, server name + API key,
-  **Start automatically when I log in**, **desktop notifications**, and a live
-  activity log.
+  **Start automatically when I log in** (on by default after first run),
+  **desktop notifications**, and a live activity log.
 - **Runs in the background** with no window of its own.
 - **Desktop notifications** when photos are backed up or the drive goes missing.
 
 ## How it's built
 
-It reuses the exact same server code as the headless CLI and the Raspberry Pi —
+It reuses the exact same server code as the headless CLI —
 `../server/src/server.js` is imported as a module. There are two HTTP listeners:
 
 | Listener | Bind | Purpose |
@@ -72,10 +84,20 @@ settings, moving the storage folder, toggles, activity log, path-traversal
 protection). The tray icon and toasts need a real desktop session, so run
 `npm start` to see those.
 
-## Packaging into a single .exe (future)
+## Packaging for non-technical users
 
-For sharing with non-technical users, the plan is to bundle this into a single
-Windows `.exe` with [`pkg`](https://www.npmjs.com/package/pkg) plus the tray /
-notifier helper binaries and an installer that adds a Start-menu shortcut — so
-recipients don't need Node installed. Not done yet; `npm start` is the current
-way to run it.
+```
+npm run package
+```
+
+Runs [`build-portable.ps1`](build-portable.ps1), which produces a self-contained
+folder at `dist/PhotoServer/` — a windowed `PhotoServer.exe` launcher, a bundled
+`node.exe`, the server + dashboard, and the tray/notifier helpers — plus a
+zipped `dist/PhotoServer-Windows.zip` to hand out. Recipients extract it and
+double-click `PhotoServer.exe`; **no Node install, no admin**. The release
+workflow runs this on a Windows runner and attaches the zip to each GitHub
+Release (see [RELEASING.md](../RELEASING.md)).
+
+It isn't code-signed, so the first launch shows a one-time SmartScreen
+"Windows protected your PC → More info → Run anyway". A signing certificate
+would remove that, but costs money and isn't needed for friends & family.

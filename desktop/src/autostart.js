@@ -1,6 +1,7 @@
 'use strict';
 
 const { execFile } = require('child_process');
+const fs = require('fs');
 const path = require('path');
 
 // "Start on login" is implemented with the per-user Windows registry Run key.
@@ -18,6 +19,14 @@ function run(args) {
 
 /** The command Windows should run at login (start hidden in the tray). */
 function launchCommand() {
+  // Portable build: PhotoServer.exe sits next to the bundled node.exe
+  // (process.execPath). Launch through it — it's a windowed exe, so login
+  // start is silent (no console window flashing). Running node.exe directly
+  // would flash a console.
+  const launcher = path.join(path.dirname(process.execPath), 'PhotoServer.exe');
+  if (fs.existsSync(launcher)) {
+    return `"${launcher}" --minimized`;
+  }
   if (process.pkg) {
     // Packaged single-exe build: relaunch ourselves.
     return `"${process.execPath}" --minimized`;

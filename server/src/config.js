@@ -11,7 +11,7 @@ const DEFAULTS = {
   port: 8420,
   discoveryPort: 38899,
   // Where photos are stored. Point this at your external SSD,
-  // e.g. "E:/PhotoBackup" on Windows or "/mnt/ssd/photos" on a Raspberry Pi.
+  // e.g. "E:/PhotoBackup" on Windows.
   storagePath: path.join(__dirname, '..', 'photos'),
   serverName: os.hostname(),
   // Optional shared secret. If non-empty, clients must send it

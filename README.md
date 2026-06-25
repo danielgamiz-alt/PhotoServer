@@ -1,30 +1,34 @@
 # PhotoServer
 
 A free, self-hosted alternative to Google Photos backup. Your phone automatically
-uploads new photos and videos to your own computer (or Raspberry Pi) whenever it's
-on the same WiFi and the server is online. Your photos stay on hardware you own —
-a PC drive, an external SSD, whatever you point it at.
+uploads new photos and videos to your own computer whenever it's on the same WiFi
+and the server is online. Your photos stay on hardware you own — a PC drive, an
+external SSD, whatever you point it at.
 
 ```
 ┌──────────┐   WiFi    ┌─────────────────────┐
-│  Phone    │ ────────► │  PC / Raspberry Pi   │
+│  Phone    │ ────────► │   Home computer      │
 │ PhotoSync │  uploads  │  PhotoServer (Node)  │──► E:\PhotoBackup\2026\06\IMG_001.jpg
-└──────────┘           └─────────────────────┘        (or /mnt/ssd/photos on a Pi)
+└──────────┘           └─────────────────────┘
 ```
 
 **Two parts:**
 
 | Part | What it is | Where it runs |
 |---|---|---|
-| [`server/`](server/) | The backend: receives and stores photos. Zero dependencies. | Windows PC, Mac, Linux, Raspberry Pi — anything with Node.js 18+ |
+| [`server/`](server/) | The backend: receives and stores photos. Zero dependencies. | Windows PC (anything with Node.js 18+) |
 | [`desktop/`](desktop/) | A Windows **tray app + dashboard** that runs the backend for you (no terminal). | Windows |
 | [`android/`](android/) | The **PhotoSync** phone app | Android 8.0+ |
 
 > **On Windows, the easiest way to run the backend is the [desktop app](desktop/)** —
 > a tray icon plus a settings dashboard where you can pick the backup folder, see
 > status, auto-start on login, and get notifications. The sections below describe
-> the underlying server (which the desktop app runs for you, and which the
-> Raspberry Pi runs headlessly).
+> the underlying server (which the desktop app runs for you).
+>
+> **Non-technical users don't need any of the steps below.** Download
+> `PhotoSync-Server-Windows-*.zip` from the [latest release](https://github.com/danielgamiz-alt/PhotoServer/releases/latest),
+> extract it, and double-click `PhotoServer.exe` — no Node, no terminal. It then
+> starts automatically on every restart. The CLI sections below are for developers.
 
 ## How it works
 
@@ -107,7 +111,6 @@ Examples of valid paths:
 | External SSD, drive E: (Windows) | `"E:/PhotoBackup"` |
 | A folder in your user directory | `"C:/Users/You/Pictures/Backup"` |
 | A network/NAS share (Windows) | `"//NAS/photos"` |
-| Raspberry Pi / Linux SSD | `"/mnt/ssd/photos"` |
 
 > **Moving photos you've already backed up:** changing `storagePath` only affects
 > *new* uploads — the server doesn't move existing files for you. If you want your
@@ -148,17 +151,6 @@ phones won't find the server; allow it manually under
 Press `Win+R`, type `shell:startup`, and put a shortcut to
 [`server/start-server.bat`](server/start-server.bat) in the folder that opens.
 The server will then start whenever you log in.
-
-## Raspberry Pi
-
-```bash
-sudo apt install nodejs   # or use nodesource for a newer version
-cd server
-node src/index.js --storage /mnt/ssd/photos
-```
-
-To run it as a background service that survives reboots, install the included
-unit file — see [`server/photoserver.service`](server/photoserver.service).
 
 ## Tests
 
