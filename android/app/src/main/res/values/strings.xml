@@ -11,7 +11,8 @@
     <string name="not_connected">Not connected yet</string>
     <string name="searching">Searching for servers on this WiFi…</string>
     <string name="no_servers_found">No server found.</string>
-    <string name="no_servers_help">Try this:\n\n(a) Make sure the PhotoSync Server app is running on your PC.\n(b) Check that both devices are on the same WiFi network.\n(c) Or type the address shown in the PC app\'s Settings into the field above.</string>
+    <string name="no_servers_help">Try this:\n\n(a) Make sure the PhotoSync Server app is running on your PC.\n(b) Check that both devices are on the same WiFi network.\n(c) Or type the address shown in the PC app\'s Settings into the field above.\n\nHaven\'t installed it on your computer yet? Tap \"Set it up\" below.</string>
+    <string name="setup_computer_cta">Set it up on the computer</string>
     <string name="try_again">Try again</string>
     <string name="pick_server">Pick a server</string>
     <string name="found_server">Found \"%1$s\" at %2$s</string>
@@ -37,6 +38,24 @@
 
     <string name="menu_settings">Settings</string>
     <string name="menu_help">How it works</string>
+    <string name="menu_invite">Invite a friend</string>
+    <string name="menu_setup_computer">Set up the computer</string>
+
+    <!-- Sharing / virality -->
+    <string name="landing_url" translatable="false">https://danielgamiz-alt.github.io/PhotoServer/</string>
+    <string name="invite_subject">Try PhotoSync — free photo backup</string>
+    <string name="invite_text">I\'m using PhotoSync to back up my phone\'s photos to my own computer — free, private, no cloud subscription. You can set it up here:\n\n%1$s</string>
+    <string name="invite_chooser">Invite a friend to PhotoSync</string>
+
+    <!-- Set up the computer (the phone → PC bridge) -->
+    <string name="setup_computer_title">Set up your home computer</string>
+    <string name="setup_computer_intro">Your photos back up to a small free app — <b>PhotoSync Server</b> — that runs on your home computer (Windows). You only set it up once, and it then starts on its own whenever the computer is on.\n\nThe easiest way: send yourself the setup link, then open it on your computer and tap <b>Download for Windows</b>.</string>
+    <string name="setup_computer_send">Send the link to myself</string>
+    <string name="setup_computer_copy">Copy link</string>
+    <string name="setup_computer_send_chooser">Send the setup link to your computer</string>
+    <string name="setup_computer_url_label">Or type this address on your computer:</string>
+    <string name="setup_computer_link_copied">Link copied</string>
+    <string name="setup_computer_after">Already installed it on the computer? Go back and tap <b>Find server</b> while on your home Wi‑Fi.</string>
     <string name="backed_up_summary">%1$d of %2$d backed up</string>
     <string name="backed_up_all">%1$d photos backed up</string>
     <string name="gallery_empty">No photos found on this device</string>
@@ -49,6 +68,13 @@
     <string name="setup_step_server">Find your server</string>
     <string name="setup_step_done">Done — your photos back up automatically</string>
     <string name="setup_not_backing_up">Not backing up yet</string>
+
+    <!-- One-time "your photos are safe → invite a friend" card, shown on the
+         main screen once everything is backed up. Dismissible (per device). -->
+    <string name="invite_card_title">Your photos are safe 🎉</string>
+    <string name="invite_card_body">PhotoSync is backing them up to your own computer — no cloud, no subscription. Know someone tired of paying for photo storage?</string>
+    <string name="invite_card_share">Invite a friend</string>
+    <string name="invite_card_dismiss">Maybe later</string>
     <string name="server_unreachable_summary">Can\'t reach your server — check it\'s on and the address is right in Settings</string>
     <string name="configure_server_first">Set up your server in Settings first</string>
     <string name="status_done">Backed up</string>

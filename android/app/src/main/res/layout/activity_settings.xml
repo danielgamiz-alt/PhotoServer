@@ -123,14 +123,29 @@
             android:textAppearance="?attr/textAppearanceBodySmall"
             android:visibility="gone" />
 
-        <Button
-            android:id="@+id/tryAgainButton"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/connectionHelpButtons"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="@string/try_again"
-            android:visibility="gone" />
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/tryAgainButton"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="@string/try_again" />
+
+            <Button
+                android:id="@+id/setupComputerButton"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/setup_computer_cta" />
+        </LinearLayout>
 
         <View
             android:layout_width="match_parent"

@@ -64,7 +64,7 @@
     </div>
     <h1>PhotoSync</h1>
     <p class="tag">Back up your phone's photos and videos to your family's own computer — free, private, no cloud subscription.</p>
-    <a class="btn" href="https://github.com/danielgamiz-alt/PhotoServer/releases/latest">Download for Android</a>
+    <a class="btn" href="https://github.com/danielgamiz-alt/PhotoServer/releases/latest/download/PhotoSync.apk">Download for Android</a>
     <div class="ver">Android 8.0 or newer · free</div>
     <div class="qr">
       <div class="card"><div id="qrcode"></div></div>
@@ -73,7 +73,7 @@
   </div>
 
   <section>
-    <h2>Installing it (about a minute)</h2>
+    <h2>First, install the app on your phone</h2>
     <div class="step">
       <div class="num">1</div>
       <div><h3>Download &amp; open</h3><p>Tap the button above, then open the downloaded <b>.apk</b> file.</p></div>
@@ -93,7 +93,7 @@
   </section>
 
   <section>
-    <h2>First, set up the home computer</h2>
+    <h2>Second, set up the home computer</h2>
     <p class="note">Your photos go to <b>PhotoSync Server</b> — a small free program on the household's Windows PC that keeps them on your own drive. Set it up <b>once</b> (about a minute) and it then starts on its own every time the computer is turned on.</p>
     <div class="step" style="margin-top:16px">
       <div class="num">1</div>
@@ -108,7 +108,7 @@
       <div><h3>Choose where photos go</h3><p>A dashboard opens and a green icon appears by the clock. Click <b>Browse…</b> and pick a folder (an external drive is ideal). That's it — it now runs automatically in the background from every restart.</p></div>
     </div>
     <p style="text-align:center; margin-top:8px">
-      <a class="btn" href="https://github.com/danielgamiz-alt/PhotoServer/releases/latest">Download for Windows</a>
+      <a class="btn" href="https://github.com/danielgamiz-alt/PhotoServer/releases/latest/download/PhotoSync-Server-Windows.zip">Download for Windows</a>
     </p>
     <p class="note" style="margin-top:16px">Your phone only backs up while it's on the same Wi‑Fi as this computer and the computer is on.</p>
   </section>
@@ -127,11 +127,13 @@
   </section>
 
   <section style="text-align:center">
-    <h2>Share this page</h2>
-    <p class="note" style="margin-bottom:20px">Setting up the family's phones? Show them this code — scanning it with a phone camera opens this page, so they can grab the app themselves.</p>
-    <div class="qr" style="margin-top:0">
+    <h2>Share with your friends</h2>
+    <p class="note" style="margin-bottom:20px">Know someone who's tired of paying for photo storage? Send them this page — they can set up their own free backups in a few minutes.</p>
+    <button class="btn" id="shareBtn" type="button">Share PhotoSync</button>
+    <span id="shareCopied" class="ver" style="display:none">Link copied — paste it to a friend 🎉</span>
+    <div class="qr" style="margin-top:28px">
       <div class="card"><div id="qrcode-page"></div></div>
-      <span>Scan to open this page on a phone</span>
+      <span>…or show them this code to scan</span>
     </div>
   </section>
 
@@ -144,7 +146,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   new QRCode(document.getElementById("qrcode"), {
-    text: "https://github.com/danielgamiz-alt/PhotoServer/releases/latest",
+    text: "https://github.com/danielgamiz-alt/PhotoServer/releases/latest/download/PhotoSync.apk",
     width: 180, height: 180,
     colorDark: "#101114", colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.M
@@ -155,6 +157,33 @@
     colorDark: "#101114", colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.M
   });
+
+  // "Share with your friends": use the native share sheet (WhatsApp, Messages,
+  // email…) on phones; fall back to WhatsApp on desktop, then copy-to-clipboard
+  // so there's always a one-tap way to pass the link along.
+  (function () {
+    var pageUrl = "https://danielgamiz-alt.github.io/PhotoServer/";
+    var msg = "I'm using PhotoSync to back up my phone's photos to my own computer — free, no cloud subscription. Set it up here: " + pageUrl;
+    var btn = document.getElementById("shareBtn");
+    var copied = document.getElementById("shareCopied");
+    function flashCopied() {
+      copied.style.display = "block";
+      setTimeout(function () { copied.style.display = "none"; }, 4000);
+    }
+    btn.addEventListener("click", function () {
+      if (navigator.share) {
+        navigator.share({ title: "PhotoSync", text: msg, url: pageUrl }).catch(function () {});
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(msg).then(flashCopied).catch(function () {
+          window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+        });
+        return;
+      }
+      window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
+    });
+  })();
 </script>
 </body>
 </html>

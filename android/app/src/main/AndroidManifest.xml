@@ -53,6 +53,12 @@
             android:parentActivityName=".MainActivity" />
 
         <activity
+            android:name=".ComputerSetupActivity"
+            android:exported="false"
+            android:label="@string/menu_setup_computer"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
             android:name=".PhotoViewerActivity"
             android:exported="false"
             android:theme="@style/Theme.PhotoSync.Viewer" />

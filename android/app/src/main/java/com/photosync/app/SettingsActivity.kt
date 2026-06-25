@@ -30,6 +30,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var apiKeyInput: EditText
     private lateinit var connectionStatus: TextView
     private lateinit var connectionHelp: TextView
+    private lateinit var connectionHelpButtons: View
     private lateinit var tryAgainButton: Button
     private lateinit var syncStatus: TextView
     private lateinit var autoSyncSwitch: SwitchCompat
@@ -56,6 +57,7 @@ class SettingsActivity : AppCompatActivity() {
         apiKeyInput = findViewById(R.id.apiKeyInput)
         connectionStatus = findViewById(R.id.connectionStatus)
         connectionHelp = findViewById(R.id.connectionHelp)
+        connectionHelpButtons = findViewById(R.id.connectionHelpButtons)
         tryAgainButton = findViewById(R.id.tryAgainButton)
         syncStatus = findViewById(R.id.syncStatus)
         autoSyncSwitch = findViewById(R.id.autoSyncSwitch)
@@ -83,6 +85,9 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<Button>(R.id.testButton).setOnClickListener { testConnection() }
         findViewById<Button>(R.id.syncNowButton).setOnClickListener { syncNow() }
         tryAgainButton.setOnClickListener { discoverServers() }
+        findViewById<Button>(R.id.setupComputerButton).setOnClickListener {
+            startActivity(Intent(this, ComputerSetupActivity::class.java))
+        }
 
         autoSyncSwitch.setOnCheckedChangeListener { _, checked ->
             prefs.autoSyncEnabled = checked
@@ -181,7 +186,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun showConnectionHelp() {
         connectionHelp.visibility = View.VISIBLE
-        tryAgainButton.visibility = View.VISIBLE
+        connectionHelpButtons.visibility = View.VISIBLE
         // Keep the URL field focused so the user can type the address from
         // the PC app's Settings without an extra tap.
         serverUrlInput.requestFocus()
@@ -189,7 +194,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun hideConnectionHelp() {
         connectionHelp.visibility = View.GONE
-        tryAgainButton.visibility = View.GONE
+        connectionHelpButtons.visibility = View.GONE
     }
 
     private fun applyServer(server: DiscoveredServer) {
