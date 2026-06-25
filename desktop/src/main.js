@@ -3,6 +3,7 @@
 const path = require('path');
 const fs = require('fs');
 const fsp = require('fs/promises');
+const http = require('http');
 const { exec, spawn } = require('child_process');
 
 const { load, save, CONFIG_FILE } = require('../../server/src/config');
@@ -15,16 +16,80 @@ const { TrashStore } = require('./trash-store');
 const { startControlServer } = require('./control-server');
 const { createTray } = require('./tray');
 const { pickFolder } = require('./folder-dialog');
+const { focusWindowByTitle } = require('./dashboard-window');
 const autostart = require('./autostart');
 
 const CONTROL_HOST = '127.0.0.1';
 const CONTROL_PORT = 8421;
 const CONTROL_URL = `http://${CONTROL_HOST}:${CONTROL_PORT}`;
+// Must match the dashboard page <title> (public/index.html) — used to find and
+// re-focus an already-open dashboard window instead of opening a second one.
+const DASHBOARD_TITLE = 'PhotoSync Server';
 const ASSETS = path.join(__dirname, '..', 'assets');
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const PREFS_FILE = path.join(path.dirname(CONFIG_FILE), 'desktop-prefs.json');
 
 const startMinimized = process.argv.includes('--minimized');
+
+// Open the dashboard as its OWN window: a chromeless Edge "app mode" window
+// (no tabs, no address bar) so it looks like a standalone program rather than a
+// browser tab. Falls back to Chrome, then the default browser.
+function findBrowser() {
+  const edges = [
+    'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+    'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
+  ];
+  const chromes = [
+    'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
+  ];
+  return [...edges, ...chromes].find((p) => fs.existsSync(p)) || null;
+}
+
+async function openDashboard() {
+  // If a dashboard window is already open, bring it to the front rather than
+  // spawning a duplicate. Only spawn a new one when there's none to focus.
+  if (await focusWindowByTitle(DASHBOARD_TITLE)) return;
+
+  const browser = findBrowser();
+  if (browser) {
+    spawn(
+      browser,
+      [`--app=${CONTROL_URL}`, '--window-size=1180,820', '--window-position=120,80'],
+      { detached: true, stdio: 'ignore' }
+    ).unref();
+  } else {
+    exec(`cmd /c start "" "${CONTROL_URL}"`); // last resort: normal browser
+  }
+}
+
+// Single-instance probe: if a copy is already running it answers on the private
+// dashboard port. Resolves true only for *our* dashboard (JSON status), so an
+// unrelated program squatting the port doesn't fool us.
+function isAnotherInstanceRunning(host = CONTROL_HOST, port = CONTROL_PORT) {
+  return new Promise((resolve) => {
+    const req = http.get(
+      // agent:false → a fresh one-shot connection, never a pooled keep-alive
+      // socket (which can linger and skew a quick probe like this).
+      { host, port, path: '/api/status', timeout: 1500, agent: false },
+      (res) => {
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (c) => { body += c; });
+        res.on('end', () => {
+          try {
+            const s = JSON.parse(body);
+            resolve(res.statusCode === 200 && typeof s.controlUrl === 'string');
+          } catch {
+            resolve(false);
+          }
+        });
+      }
+    );
+    req.on('error', () => resolve(false)); // nothing listening → free to start
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+  });
+}
 
 // Desktop-only prefs (not part of the shared server config.json).
 function loadPrefs() {
@@ -43,6 +108,15 @@ function savePrefs(prefs) {
 }
 
 async function main() {
+  // Single-instance guard — do this FIRST, before touching the storage index,
+  // so a second double-click can never race the first over index.json. If a
+  // copy already owns the dashboard, just surface its window and quit.
+  if (await isAnotherInstanceRunning()) {
+    console.log('PhotoSync Server is already running; opening its dashboard.');
+    await openDashboard();
+    process.exit(0);
+  }
+
   const config = load([]); // load config.json (creates it on first run)
   const prefs = loadPrefs();
 
@@ -238,34 +312,6 @@ async function main() {
     }
   }
 
-  // Open the dashboard as its OWN window: a chromeless Edge "app mode" window
-  // (no tabs, no address bar) so it looks like a standalone program rather than
-  // a browser tab. Falls back to Chrome, then the default browser.
-  function findBrowser() {
-    const edges = [
-      'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-      'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
-    ];
-    const chromes = [
-      'C:/Program Files/Google/Chrome/Application/chrome.exe',
-      'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
-    ];
-    return [...edges, ...chromes].find((p) => fs.existsSync(p)) || null;
-  }
-
-  function openDashboard() {
-    const browser = findBrowser();
-    if (browser) {
-      spawn(
-        browser,
-        [`--app=${CONTROL_URL}`, '--window-size=1180,820', '--window-position=120,80'],
-        { detached: true, stdio: 'ignore' }
-      ).unref();
-    } else {
-      exec(`cmd /c start "" "${CONTROL_URL}"`); // last resort: normal browser
-    }
-  }
-
   async function quit() {
     activityLog.add('info', 'Shutting down');
     try {
@@ -440,7 +486,7 @@ async function main() {
     if (e.code === 'EADDRINUSE') {
       // Another instance already owns the dashboard port — just surface it.
       console.log('PhotoSync Server is already running; opening its dashboard.');
-      openDashboard();
+      await openDashboard();
       process.exit(0);
     }
     throw e;
@@ -476,7 +522,13 @@ async function main() {
   console.log(`PhotoSync Server desktop running. Dashboard: ${CONTROL_URL}`);
 }
 
-main().catch((err) => {
-  console.error('fatal:', err);
-  process.exit(1);
-});
+// Only boot when launched directly (`node src/main.js`); when required from a
+// test, expose the pieces worth checking without starting the whole app.
+if (require.main === module) {
+  main().catch((err) => {
+    console.error('fatal:', err);
+    process.exit(1);
+  });
+}
+
+module.exports = { main, isAnotherInstanceRunning };
