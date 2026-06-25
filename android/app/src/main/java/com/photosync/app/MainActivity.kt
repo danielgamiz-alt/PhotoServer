@@ -256,6 +256,14 @@ class MainActivity : AppCompatActivity() {
                 }
                 true
             }
+            R.id.action_setup_computer -> {
+                startActivity(Intent(this, ComputerSetupActivity::class.java))
+                true
+            }
+            R.id.action_invite -> {
+                shareApp()
+                true
+            }
             R.id.action_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
                 true
@@ -266,6 +274,20 @@ class MainActivity : AppCompatActivity() {
             }
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    /**
+     * "Invite a friend": opens the system share sheet (WhatsApp, Messages,
+     * email…) with the install link, so people can spread PhotoSync the same
+     * way they share everything else.
+     */
+    private fun shareApp() {
+        val share = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, getString(R.string.invite_subject))
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.invite_text, getString(R.string.landing_url)))
+        }
+        startActivity(Intent.createChooser(share, getString(R.string.invite_chooser)))
     }
 
     /** Hands the ordered media list to the viewer and opens it at [mediaIndex]. */

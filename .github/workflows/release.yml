@@ -61,12 +61,20 @@ jobs:
             -PversionCodeOverride="${{ github.run_number }}"
 
       - name: Name the APK after the tag
-        run: cp android/app/build/outputs/apk/release/app-release.apk "PhotoSync-${GITHUB_REF_NAME}.apk"
+        # Two copies: a version-named one (clear in the releases list) and a
+        # fixed-named PhotoSync.apk so the landing page can link straight to
+        #   …/releases/latest/download/PhotoSync.apk
+        # — a stable one-tap download that never changes between versions.
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk "PhotoSync-${GITHUB_REF_NAME}.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "PhotoSync.apk"
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: PhotoSync-${{ github.ref_name }}.apk
+          files: |
+            PhotoSync-${{ github.ref_name }}.apk
+            PhotoSync.apk
           generate_release_notes: true
           fail_on_unmatched_files: true
 
@@ -99,11 +107,17 @@ jobs:
         run: npm run package
 
       - name: Name the zip after the tag
+        # Version-named + fixed-named copy, same as the APK, so the landing page
+        # can link straight to …/releases/latest/download/PhotoSync-Server-Windows.zip
         shell: pwsh
-        run: Copy-Item desktop/dist/PhotoServer-Windows.zip "PhotoSync-Server-Windows-${{ github.ref_name }}.zip"
+        run: |
+          Copy-Item desktop/dist/PhotoServer-Windows.zip "PhotoSync-Server-Windows-${{ github.ref_name }}.zip"
+          Copy-Item desktop/dist/PhotoServer-Windows.zip "PhotoSync-Server-Windows.zip"
 
       - name: Attach to the Release
         uses: softprops/action-gh-release@v2
         with:
-          files: PhotoSync-Server-Windows-${{ github.ref_name }}.zip
+          files: |
+            PhotoSync-Server-Windows-${{ github.ref_name }}.zip
+            PhotoSync-Server-Windows.zip
           fail_on_unmatched_files: true
