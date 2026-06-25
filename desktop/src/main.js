@@ -521,7 +521,7 @@ async function main() {
     tooltip: 'PhotoSync Server',
     handlers: {
       onOpenDashboard: openDashboard,
-      onToggleServer: () => deps.setServerRunning(!photoServer.running),
+      onSetRunning: (run) => deps.setServerRunning(run),
       onOpenFolder: openFolder,
       onQuit: quit,
     },
