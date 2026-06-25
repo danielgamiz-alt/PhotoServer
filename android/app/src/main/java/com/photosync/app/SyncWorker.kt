@@ -1,11 +1,17 @@
 package com.photosync.app
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
+import androidx.work.ForegroundInfo
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
@@ -46,6 +52,46 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         }
     }
 
+    /**
+     * Required so the worker can promote itself to a foreground service mid-pass
+     * (and for any expedited start). The real progress notification is pushed via
+     * setForeground() once we know how many items the pass will upload.
+     */
+    override suspend fun getForegroundInfo(): ForegroundInfo = foregroundInfo(0, 0)
+
+    /** Pushes/updates the ongoing "Backing up…" notification for this pass. */
+    private suspend fun setProgress(done: Int, total: Int) {
+        runCatching { setForeground(foregroundInfo(done, total)) }
+            .onFailure { Log.w(TAG, "could not run as a foreground service", it) }
+    }
+
+    private fun foregroundInfo(done: Int, total: Int): ForegroundInfo {
+        ensureChannel()
+        val text = if (total > 0) "Backing up $done of $total photos" else "Backing up photos…"
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_status_uploading)
+            .setContentTitle("PhotoSync")
+            .setContentText(text)
+            .setOngoing(true)
+            .setProgress(total, done, total == 0)
+            .build()
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ForegroundInfo(NOTIF_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(NOTIF_ID, notification)
+        }
+    }
+
+    private fun ensureChannel() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+        val nm = applicationContext.getSystemService(NotificationManager::class.java)
+        if (nm.getNotificationChannel(CHANNEL_ID) != null) return
+        nm.createNotificationChannel(
+            NotificationChannel(CHANNEL_ID, "Backup progress", NotificationManager.IMPORTANCE_LOW)
+                .apply { description = "Shows while photos are being backed up." }
+        )
+    }
+
     private suspend fun runPass(prefs: SyncPrefs): Result {
         val api = ServerApi(prefs.serverUrl, prefs.apiKey, prefs.username)
         if (api.health() == null) {
@@ -72,6 +118,11 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         var skipped = 0
         var errors = 0
 
+        // We have real work to do, so run as a foreground service: this keeps
+        // the upload going while the phone is locked / dozing instead of the OS
+        // suspending the background worker. (Best effort — see setProgress.)
+        setProgress(0, batch.size)
+
         try {
             // Hash the batch, ask the server what it's missing, upload that.
             val hashes = HashMap<MediaItem, String>(batch.size)
@@ -91,6 +142,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
                     skipped++
                     log.markUploaded(item.id, hash)
                     SyncEvents.notifyChanged()
+                    setProgress(uploaded + skipped, batch.size)
                     continue
                 }
                 try {
@@ -104,6 +156,7 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
                     prefs.totalUploaded += 1
                     log.markUploaded(item.id, hash)
                     SyncEvents.notifyChanged()
+                    setProgress(uploaded + skipped, batch.size)
                 } catch (e: Exception) {
                     Log.w(TAG, "upload failed for ${item.displayName}", e)
                     errors++
@@ -143,6 +196,8 @@ class SyncWorker(context: Context, params: WorkerParameters) : CoroutineWorker(c
         private const val MAX_ITEMS_PER_RUN = 100
         private const val PERIODIC_WORK = "photosync-periodic"
         private const val ONETIME_WORK = "photosync-now"
+        private const val CHANNEL_ID = "backup-progress"
+        private const val NOTIF_ID = 42
 
         private fun wifiConstraints() = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.UNMETERED)

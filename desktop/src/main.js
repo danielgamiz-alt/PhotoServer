@@ -3,6 +3,7 @@
 const path = require('path');
 const fs = require('fs');
 const fsp = require('fs/promises');
+const http = require('http');
 const { exec, spawn } = require('child_process');
 
 const { load, save, CONFIG_FILE } = require('../../server/src/config');
@@ -26,6 +27,60 @@ const PREFS_FILE = path.join(path.dirname(CONFIG_FILE), 'desktop-prefs.json');
 
 const startMinimized = process.argv.includes('--minimized');
 
+// Open the dashboard as its OWN window: a chromeless Edge "app mode" window
+// (no tabs, no address bar) so it looks like a standalone program rather than a
+// browser tab. Falls back to Chrome, then the default browser.
+function findBrowser() {
+  const edges = [
+    'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
+    'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
+  ];
+  const chromes = [
+    'C:/Program Files/Google/Chrome/Application/chrome.exe',
+    'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
+  ];
+  return [...edges, ...chromes].find((p) => fs.existsSync(p)) || null;
+}
+
+function openDashboard() {
+  const browser = findBrowser();
+  if (browser) {
+    spawn(
+      browser,
+      [`--app=${CONTROL_URL}`, '--window-size=1180,820', '--window-position=120,80'],
+      { detached: true, stdio: 'ignore' }
+    ).unref();
+  } else {
+    exec(`cmd /c start "" "${CONTROL_URL}"`); // last resort: normal browser
+  }
+}
+
+// Single-instance probe: if a copy is already running it answers on the private
+// dashboard port. Resolves true only for *our* dashboard (JSON status), so an
+// unrelated program squatting the port doesn't fool us.
+function isAnotherInstanceRunning() {
+  return new Promise((resolve) => {
+    const req = http.get(
+      { host: CONTROL_HOST, port: CONTROL_PORT, path: '/api/status', timeout: 1500 },
+      (res) => {
+        let body = '';
+        res.setEncoding('utf8');
+        res.on('data', (c) => { body += c; });
+        res.on('end', () => {
+          try {
+            const s = JSON.parse(body);
+            resolve(res.statusCode === 200 && typeof s.controlUrl === 'string');
+          } catch {
+            resolve(false);
+          }
+        });
+      }
+    );
+    req.on('error', () => resolve(false)); // nothing listening → free to start
+    req.on('timeout', () => { req.destroy(); resolve(false); });
+  });
+}
+
 // Desktop-only prefs (not part of the shared server config.json).
 function loadPrefs() {
   try {
@@ -43,6 +98,15 @@ function savePrefs(prefs) {
 }
 
 async function main() {
+  // Single-instance guard — do this FIRST, before touching the storage index,
+  // so a second double-click can never race the first over index.json. If a
+  // copy already owns the dashboard, just surface its window and quit.
+  if (await isAnotherInstanceRunning()) {
+    console.log('PhotoSync Server is already running; opening its dashboard.');
+    openDashboard();
+    process.exit(0);
+  }
+
   const config = load([]); // load config.json (creates it on first run)
   const prefs = loadPrefs();
 
@@ -235,34 +299,6 @@ async function main() {
       exec(`explorer "${target}"`);
     } else {
       notifier.notify('PhotoSync Server', 'Backup drive is not connected.');
-    }
-  }
-
-  // Open the dashboard as its OWN window: a chromeless Edge "app mode" window
-  // (no tabs, no address bar) so it looks like a standalone program rather than
-  // a browser tab. Falls back to Chrome, then the default browser.
-  function findBrowser() {
-    const edges = [
-      'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-      'C:/Program Files/Microsoft/Edge/Application/msedge.exe',
-    ];
-    const chromes = [
-      'C:/Program Files/Google/Chrome/Application/chrome.exe',
-      'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe',
-    ];
-    return [...edges, ...chromes].find((p) => fs.existsSync(p)) || null;
-  }
-
-  function openDashboard() {
-    const browser = findBrowser();
-    if (browser) {
-      spawn(
-        browser,
-        [`--app=${CONTROL_URL}`, '--window-size=1180,820', '--window-position=120,80'],
-        { detached: true, stdio: 'ignore' }
-      ).unref();
-    } else {
-      exec(`cmd /c start "" "${CONTROL_URL}"`); // last resort: normal browser
     }
   }
 
