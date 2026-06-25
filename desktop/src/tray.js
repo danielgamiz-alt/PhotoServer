@@ -82,8 +82,13 @@ async function createTray({ runningIcoPath, stoppedIcoPath, running, tooltip, ha
     update({ running: isRunning, tooltip: tip }) {
       try {
         applyRunning(isRunning); // mutate the shared items in place (keeps __id)
+        // update-menu alone applies the menu-level icon/tooltip but the Windows
+        // tray binary does NOT re-render item *titles* from it, so the toggle
+        // would stay stuck on "Stop server". update-menu-and-item updates the
+        // menu AND refreshes the toggle item in place, so its label flips
+        // between "Stop server" and "Start server".
         systray.sendAction({
-          type: 'update-menu',
+          type: 'update-menu-and-item',
           menu: {
             icon: isRunning ? icons.running : icons.stopped,
             isTemplateIcon: false,
@@ -91,6 +96,8 @@ async function createTray({ runningIcoPath, stoppedIcoPath, running, tooltip, ha
             tooltip: tip || 'PhotoSync Server',
             items,
           },
+          item: items[TOGGLE],
+          seq_id: TOGGLE,
         });
       } catch {
         /* tray update is best-effort */
