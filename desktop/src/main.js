@@ -16,11 +16,15 @@ const { TrashStore } = require('./trash-store');
 const { startControlServer } = require('./control-server');
 const { createTray } = require('./tray');
 const { pickFolder } = require('./folder-dialog');
+const { focusWindowByTitle } = require('./dashboard-window');
 const autostart = require('./autostart');
 
 const CONTROL_HOST = '127.0.0.1';
 const CONTROL_PORT = 8421;
 const CONTROL_URL = `http://${CONTROL_HOST}:${CONTROL_PORT}`;
+// Must match the dashboard page <title> (public/index.html) — used to find and
+// re-focus an already-open dashboard window instead of opening a second one.
+const DASHBOARD_TITLE = 'PhotoSync Server';
 const ASSETS = path.join(__dirname, '..', 'assets');
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const PREFS_FILE = path.join(path.dirname(CONFIG_FILE), 'desktop-prefs.json');
@@ -42,7 +46,11 @@ function findBrowser() {
   return [...edges, ...chromes].find((p) => fs.existsSync(p)) || null;
 }
 
-function openDashboard() {
+async function openDashboard() {
+  // If a dashboard window is already open, bring it to the front rather than
+  // spawning a duplicate. Only spawn a new one when there's none to focus.
+  if (await focusWindowByTitle(DASHBOARD_TITLE)) return;
+
   const browser = findBrowser();
   if (browser) {
     spawn(
@@ -105,7 +113,7 @@ async function main() {
   // copy already owns the dashboard, just surface its window and quit.
   if (await isAnotherInstanceRunning()) {
     console.log('PhotoSync Server is already running; opening its dashboard.');
-    openDashboard();
+    await openDashboard();
     process.exit(0);
   }
 
@@ -478,7 +486,7 @@ async function main() {
     if (e.code === 'EADDRINUSE') {
       // Another instance already owns the dashboard port — just surface it.
       console.log('PhotoSync Server is already running; opening its dashboard.');
-      openDashboard();
+      await openDashboard();
       process.exit(0);
     }
     throw e;
