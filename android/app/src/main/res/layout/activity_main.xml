@@ -12,7 +12,7 @@
         app:logo="@drawable/ic_launcher_foreground"
         app:logoScaleType="fitCenter"
         app:title="@string/app_name"
-        app:titleTextAppearance="?attr/textAppearanceTitleMedium" />
+        app:titleTextAppearance="?attr/textAppearanceTitleLarge" />
 
     <!-- Summary bar: backup status on the left, a persistent "Set up backup"
          CTA on the right that stays visible until the server + name are set. -->
