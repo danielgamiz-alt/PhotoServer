@@ -14,15 +14,16 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URLEncoder
 
 /**
  * Shows all photos and videos stored on the PhotoSync server for the current
  * user. Thumbnails stream directly from the server via Glide (authenticated).
- * Tapping a photo opens the full-screen viewer; the viewer's download button
- * saves the item back to the device's Pictures folder.
+ * Items already on this device show a phone-icon badge so the user knows
+ * a download isn't needed. Tapping opens the full-screen viewer; the download
+ * button in the viewer is hidden for items that are already local.
  */
 class ServerGalleryActivity : AppCompatActivity() {
 
@@ -78,6 +79,13 @@ class ServerGalleryActivity : AppCompatActivity() {
         load()
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh local-hashes when returning from the viewer (user may have
+        // downloaded something and the UploadLog may now contain the hash).
+        refreshLocalHashes()
+    }
+
     private fun load() {
         if (prefs.serverUrl.isEmpty()) {
             Toast.makeText(this, R.string.server_not_configured, Toast.LENGTH_LONG).show()
@@ -88,7 +96,16 @@ class ServerGalleryActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val api = ServerApi(prefs.serverUrl, prefs.apiKey, prefs.username)
-                val serverItems = withContext(Dispatchers.IO) { api.listGallery() }
+
+                // Fetch server list and local hashes concurrently.
+                val serverDeferred = async(Dispatchers.IO) { api.listGallery() }
+                val hashesDeferred = async(Dispatchers.IO) {
+                    UploadLog.get(this@ServerGalleryActivity).uploadedHashes()
+                }
+
+                val serverItems = serverDeferred.await()
+                val localHashes = hashesDeferred.await()
+
                 val mediaItems = serverItems.map { item ->
                     MediaItem(
                         id = item.hash.hashCode().toLong(),
@@ -104,6 +121,7 @@ class ServerGalleryActivity : AppCompatActivity() {
                 val entries = mediaItems.map { GalleryEntry(it, SyncStatus.DONE) }
                 rows = withContext(Dispatchers.Default) { GallerySections.build(entries) }
                 adapter.submitList(rows)
+                adapter.setLocalHashes(localHashes)
                 emptyText.visibility = if (mediaItems.isEmpty()) View.VISIBLE else View.GONE
                 rows.firstOrNull()?.sectionLabel?.let { flashDatePill(it) }
             } catch (e: Exception) {
@@ -112,6 +130,16 @@ class ServerGalleryActivity : AppCompatActivity() {
             } finally {
                 swipe.isRefreshing = false
             }
+        }
+    }
+
+    /** Re-reads local hashes from the UploadLog (e.g. after returning from viewer). */
+    private fun refreshLocalHashes() {
+        lifecycleScope.launch {
+            val hashes = withContext(Dispatchers.IO) {
+                UploadLog.get(this@ServerGalleryActivity).uploadedHashes()
+            }
+            adapter.setLocalHashes(hashes)
         }
     }
 

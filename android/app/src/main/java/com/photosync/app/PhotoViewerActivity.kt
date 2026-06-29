@@ -12,12 +12,16 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.viewpager2.widget.ViewPager2
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URLEncoder
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -28,6 +32,9 @@ import java.util.Locale
  * Videos play in-app with sound and controls; swiping to another page stops
  * playback. The media list is handed over via [GalleryData] to avoid
  * serializing it through the Intent. No sharing or editing — view only.
+ *
+ * When [EXTRA_DOWNLOADABLE] is true (server gallery), a download button appears
+ * in the top bar. It is hidden for items the user already has on the device.
  */
 @OptIn(UnstableApi::class)
 class PhotoViewerActivity : AppCompatActivity() {
@@ -43,6 +50,9 @@ class PhotoViewerActivity : AppCompatActivity() {
     private var items: List<MediaItem> = emptyList()
     private var chromeVisible = true
     private var downloadable = false
+
+    /** Hashes of files the user already has locally; populated async on start. */
+    private var localHashes: Set<String> = emptySet()
 
     private val headerFormat = SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault())
 
@@ -65,7 +75,6 @@ class PhotoViewerActivity : AppCompatActivity() {
         downloadButton = findViewById(R.id.viewerDownload)
 
         findViewById<View>(R.id.viewerBack).setOnClickListener { finish() }
-        downloadButton.visibility = if (downloadable) View.VISIBLE else View.GONE
         downloadButton.setOnClickListener { downloadCurrent() }
 
         // When items are server URLs (http://), use a data source factory that
@@ -88,17 +97,38 @@ class PhotoViewerActivity : AppCompatActivity() {
         pager.setCurrentItem(startIndex, false)
         pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                adapter.stopPlayback() // leaving a video stops it
+                adapter.stopPlayback()
                 updateChrome(position)
             }
         })
         updateChrome(startIndex)
+
+        if (downloadable) {
+            lifecycleScope.launch {
+                localHashes = withContext(Dispatchers.IO) {
+                    UploadLog.get(this@PhotoViewerActivity).uploadedHashes()
+                }
+                updateDownloadButton(pager.currentItem)
+            }
+        }
     }
 
     private fun updateChrome(position: Int) {
         val item = items.getOrNull(position) ?: return
         dateText.text = headerFormat.format(Date(item.takenAtMs))
         nameText.text = item.displayName
+        updateDownloadButton(position)
+    }
+
+    private fun updateDownloadButton(position: Int) {
+        if (!downloadable) {
+            downloadButton.visibility = View.GONE
+            return
+        }
+        val item = items.getOrNull(position) ?: return
+        val hash = extractFileHash(item.uri.toString())
+        val alreadyLocal = hash != null && hash in localHashes
+        downloadButton.visibility = if (alreadyLocal) View.GONE else View.VISIBLE
     }
 
     private fun toggleChrome() {
@@ -120,9 +150,11 @@ class PhotoViewerActivity : AppCompatActivity() {
         val request = DownloadManager.Request(Uri.parse(uriString)).apply {
             setTitle(item.displayName)
             setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+            // Save to DCIM/Camera so the photo appears in the camera roll and
+            // PhotoSync's own local gallery picks it up immediately.
             setDestinationInExternalPublicDir(
-                Environment.DIRECTORY_PICTURES,
-                "PhotoSync/${item.displayName}",
+                Environment.DIRECTORY_DCIM,
+                "Camera/${item.displayName}",
             )
             if (prefs.apiKey.isNotEmpty()) addRequestHeader("x-api-key", prefs.apiKey)
             if (prefs.username.isNotEmpty()) addRequestHeader(
@@ -132,6 +164,8 @@ class PhotoViewerActivity : AppCompatActivity() {
         val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         dm.enqueue(request)
         Toast.makeText(this, R.string.downloading, Toast.LENGTH_SHORT).show()
+        // Optimistically hide the download button; the file is on its way.
+        downloadButton.visibility = View.GONE
     }
 
     override fun onStop() {
@@ -149,5 +183,15 @@ class PhotoViewerActivity : AppCompatActivity() {
         const val EXTRA_INDEX = "index"
         /** Pass true when viewing server photos to show the download button. */
         const val EXTRA_DOWNLOADABLE = "downloadable"
+
+        /** Extracts the 64-char hex hash from a server file URL, or null. */
+        fun extractFileHash(url: String): String? {
+            val prefix = "/api/file/"
+            val idx = url.lastIndexOf(prefix)
+            if (idx < 0) return null
+            val candidate = url.substring(idx + prefix.length)
+            return if (candidate.length == 64 && candidate.all { it in '0'..'9' || it in 'a'..'f' })
+                candidate else null
+        }
     }
 }

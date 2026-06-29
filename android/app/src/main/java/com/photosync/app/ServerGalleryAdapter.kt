@@ -12,11 +12,14 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 
+private val FILE_HASH_RE = Regex("""/api/file/([a-f0-9]{64})$""")
+
 /**
  * Grid adapter for the server gallery. Shows thumbnails loaded directly from
- * the server via Glide (with auth headers); no status badges. Headers and
- * [GalleryRow] rows are built by [GallerySections] exactly as in the local
- * gallery, so the layout and date-pill behaviour are identical.
+ * the server via Glide (with auth headers). Items already present on the
+ * device show a phone-icon badge so the user knows a download isn't needed.
+ * Date headers and row structure are built by [GallerySections], identical to
+ * the local gallery.
  */
 class ServerGalleryAdapter(
     private val apiKey: String,
@@ -24,7 +27,15 @@ class ServerGalleryAdapter(
     private val onItemClick: (mediaIndex: Int) -> Unit,
 ) : ListAdapter<GalleryRow, RecyclerView.ViewHolder>(DIFF) {
 
+    /** SHA-256 hashes of files the user already has on this device. */
+    private var localHashes: Set<String> = emptySet()
+
     init { setHasStableIds(true) }
+
+    fun setLocalHashes(hashes: Set<String>) {
+        localHashes = hashes
+        notifyItemRangeChanged(0, itemCount)
+    }
 
     override fun getItemId(position: Int): Long = getItem(position).id
 
@@ -44,7 +55,7 @@ class ServerGalleryAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (val row = getItem(position)) {
             is GalleryRow.Header -> (holder as HeaderHolder).bind(row)
-            is GalleryRow.Photo -> (holder as PhotoHolder).bind(row, apiKey, username)
+            is GalleryRow.Photo -> (holder as PhotoHolder).bind(row, apiKey, username, localHashes)
         }
     }
 
@@ -60,22 +71,20 @@ class ServerGalleryAdapter(
         private val thumb: ImageView = view.findViewById(R.id.thumb)
         private val badge: ImageView = view.findViewById(R.id.badge)
 
-        fun bind(row: GalleryRow.Photo, apiKey: String, username: String) {
-            badge.visibility = View.GONE
+        fun bind(row: GalleryRow.Photo, apiKey: String, username: String, localHashes: Set<String>) {
             itemView.setOnClickListener { onItemClick(row.mediaIndex) }
 
-            val uri = row.entry.item.uri.toString()
-            val glideUrl = if (apiKey.isNotEmpty() || username.isNotEmpty()) {
-                val headers = LazyHeaders.Builder().apply {
-                    if (apiKey.isNotEmpty()) addHeader("x-api-key", apiKey)
-                    if (username.isNotEmpty()) addHeader(
-                        "x-user", java.net.URLEncoder.encode(username, "UTF-8")
-                    )
-                }.build()
-                GlideUrl(uri, headers)
+            val uriString = row.entry.item.uri.toString()
+            val hash = FILE_HASH_RE.find(uriString)?.groupValues?.get(1)
+            val onDevice = hash != null && hash in localHashes
+            if (onDevice) {
+                badge.setImageResource(R.drawable.ic_on_device)
+                badge.visibility = View.VISIBLE
             } else {
-                GlideUrl(uri)
+                badge.visibility = View.GONE
             }
+
+            val glideUrl = buildGlideUrl(uriString, apiKey, username)
             Glide.with(thumb).load(glideUrl).centerCrop().into(thumb)
         }
     }
@@ -83,6 +92,20 @@ class ServerGalleryAdapter(
     companion object {
         private const val TYPE_HEADER = 0
         private const val TYPE_PHOTO = 1
+
+        fun buildGlideUrl(url: String, apiKey: String, username: String): GlideUrl {
+            return if (apiKey.isNotEmpty() || username.isNotEmpty()) {
+                val headers = LazyHeaders.Builder().apply {
+                    if (apiKey.isNotEmpty()) addHeader("x-api-key", apiKey)
+                    if (username.isNotEmpty()) addHeader(
+                        "x-user", java.net.URLEncoder.encode(username, "UTF-8")
+                    )
+                }.build()
+                GlideUrl(url, headers)
+            } else {
+                GlideUrl(url)
+            }
+        }
 
         private val DIFF = object : DiffUtil.ItemCallback<GalleryRow>() {
             override fun areItemsTheSame(oldItem: GalleryRow, newItem: GalleryRow) =

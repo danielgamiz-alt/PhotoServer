@@ -34,6 +34,15 @@ class UploadLog private constructor(context: Context) :
         return ids
     }
 
+    /** SHA-256 hashes of every file that has been uploaded (or confirmed on the server). */
+    fun uploadedHashes(): Set<String> {
+        val hashes = HashSet<String>()
+        readableDatabase.rawQuery("SELECT hash FROM uploaded", null).use { cursor ->
+            while (cursor.moveToNext()) hashes.add(cursor.getString(0))
+        }
+        return hashes
+    }
+
     fun markUploaded(mediaId: Long, hash: String) {
         val values = ContentValues().apply {
             put("media_id", mediaId)
