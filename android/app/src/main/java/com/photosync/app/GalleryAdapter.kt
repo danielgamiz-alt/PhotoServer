@@ -109,15 +109,14 @@ class GalleryAdapter(
     inner class PhotoHolder(view: View) : RecyclerView.ViewHolder(view) {
         private val thumb: ImageView = view.findViewById(R.id.thumb)
         val badge: ImageView = view.findViewById(R.id.badge)
-        private val checkOverlay: View? = view.findViewById(R.id.checkOverlay)
+        private val selectionCircle: ImageView? = view.findViewById(R.id.selectionCircle)
 
         fun bind(row: GalleryRow.Photo) {
             itemView.setOnClickListener { onTileClick(row) }
             itemView.setOnLongClickListener { onTileLongClick(row); true }
             Glide.with(thumb).load(row.entry.item.uri).centerCrop().into(thumb)
             applyStatusBadge(badge, row.entry.status)
-            val selected = row.entry.item.id in selectedIds
-            checkOverlay?.visibility = if (selected) View.VISIBLE else View.GONE
+            applySelectionCircle(selectionCircle, row.entry.item.id)
         }
     }
 
@@ -125,7 +124,7 @@ class GalleryAdapter(
         private val thumb: ImageView = view.findViewById(R.id.thumb)
         val badge: ImageView = view.findViewById(R.id.badge)
         private val durationText: TextView = view.findViewById(R.id.durationText)
-        private val checkOverlay: View? = view.findViewById(R.id.checkOverlay)
+        private val selectionCircle: ImageView? = view.findViewById(R.id.selectionCircle)
 
         fun bind(row: GalleryRow.Photo) {
             itemView.setOnClickListener { onTileClick(row) }
@@ -133,8 +132,21 @@ class GalleryAdapter(
             Glide.with(thumb).load(row.entry.item.uri).centerCrop().into(thumb)
             durationText.text = formatVideoDuration(row.entry.item.durationMs)
             applyStatusBadge(badge, row.entry.status)
-            val selected = row.entry.item.id in selectedIds
-            checkOverlay?.visibility = if (selected) View.VISIBLE else View.GONE
+            applySelectionCircle(selectionCircle, row.entry.item.id)
+        }
+    }
+
+    private fun applySelectionCircle(circle: ImageView?, itemId: Long) {
+        circle ?: return
+        if (!selectionMode) {
+            circle.visibility = View.GONE
+            return
+        }
+        circle.visibility = View.VISIBLE
+        if (itemId in selectedIds) {
+            circle.setImageResource(R.drawable.ic_sel_checked)
+        } else {
+            circle.setImageResource(R.drawable.ic_sel_unchecked)
         }
     }
 

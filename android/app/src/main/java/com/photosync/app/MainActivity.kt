@@ -14,7 +14,6 @@ import android.os.Looper
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -70,10 +69,9 @@ class MainActivity : AppCompatActivity() {
     private var pendingUpdate: UpdateChecker.AppUpdate? = null
     private lateinit var previewController: VideoPreviewController
 
-    // Selection action bar
-    private lateinit var selectionBar: View
-    private lateinit var selectionCount: TextView
-    private lateinit var selectionCancel: ImageButton
+    // Selection UI (bottom bar replaces the filter pill; toolbar shows "✕ N")
+    private lateinit var selectionBottomBar: View
+    private lateinit var filterPill: View
 
     // Pending delete-from-device URIs; the system dialog resolves asynchronously on API 30+.
     private var pendingDeleteIds: List<Long> = emptyList()
@@ -183,15 +181,13 @@ class MainActivity : AppCompatActivity() {
         ) { rows }
         previewController.onPreviewClick = ::openViewer
 
-        selectionBar = findViewById(R.id.selectionBar)
-        selectionCount = findViewById(R.id.selectionCount)
-        selectionCancel = findViewById(R.id.selectionCancel)
-        selectionCancel.setOnClickListener { adapter.exitSelectionMode() }
+        selectionBottomBar = findViewById(R.id.selectionBottomBar)
+        filterPill = findViewById(R.id.filterPill)
+        findViewById<View>(R.id.selectionTrash).setOnClickListener {
+            confirmDelete(alsoServer = true)
+        }
         findViewById<View>(R.id.selectionDeleteDevice).setOnClickListener {
             confirmDelete(alsoServer = false)
-        }
-        findViewById<View>(R.id.selectionDeleteEverywhere).setOnClickListener {
-            confirmDelete(alsoServer = true)
         }
 
         adapter = GalleryAdapter(
@@ -581,11 +577,29 @@ class MainActivity : AppCompatActivity() {
     private fun onSelectionChanged(selected: Set<Long>) {
         latestSelected = selected
         if (selected.isEmpty()) {
-            selectionBar.visibility = View.GONE
+            exitSelectionUi()
         } else {
-            selectionBar.visibility = View.VISIBLE
-            selectionCount.text = getString(R.string.selection_count, selected.size)
+            enterSelectionUi(selected.size)
         }
+    }
+
+    private fun enterSelectionUi(count: Int) {
+        selectionBottomBar.visibility = View.VISIBLE
+        filterPill.visibility = View.GONE
+        val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+        toolbar.logo = null
+        toolbar.setNavigationIcon(R.drawable.ic_close)
+        toolbar.setNavigationOnClickListener { adapter.exitSelectionMode() }
+        toolbar.title = getString(R.string.selection_count, count)
+    }
+
+    private fun exitSelectionUi() {
+        selectionBottomBar.visibility = View.GONE
+        filterPill.visibility = View.VISIBLE
+        val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+        toolbar.logo = ContextCompat.getDrawable(this, R.drawable.ic_launcher_foreground)
+        toolbar.navigationIcon = null
+        toolbar.title = getString(R.string.app_name)
     }
 
     private fun confirmDelete(alsoServer: Boolean) {
