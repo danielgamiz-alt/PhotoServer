@@ -98,6 +98,8 @@
     <string name="reindex_done_new">Found %1$d new file(s)</string>
     <string name="reindex_done_none">No new files found</string>
     <string name="server_gallery_title">Photos on server</string>
+    <string name="server_gallery_offline_title">Can\'t reach the server</string>
+    <string name="server_gallery_offline_detail">Make sure you\'re on your home Wi‑Fi and the PhotoSync Server app is running on your PC.</string>
     <string name="server_gallery_empty">No photos stored on the server yet</string>
     <string name="server_gallery_error">Could not load photos: %1$s</string>
     <string name="downloading">Saving to camera roll…</string>

@@ -6,8 +6,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import com.google.android.material.button.MaterialButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -36,6 +38,8 @@ class ServerGalleryActivity : AppCompatActivity() {
     private lateinit var swipe: SwipeRefreshLayout
     private lateinit var emptyText: TextView
     private lateinit var datePill: TextView
+    private lateinit var errorView: LinearLayout
+    private lateinit var errorDetail: TextView
 
     private var items: List<MediaItem> = emptyList()
     private var rows: List<GalleryRow> = emptyList()
@@ -55,9 +59,13 @@ class ServerGalleryActivity : AppCompatActivity() {
         toolbar.setNavigationOnClickListener { finish() }
 
         emptyText = findViewById(R.id.emptyText)
+        errorView = findViewById(R.id.errorView)
+        errorDetail = findViewById(R.id.errorDetail)
         swipe = findViewById(R.id.swipeRefresh)
         datePill = findViewById(R.id.datePill)
         grid = findViewById(R.id.photoGrid)
+
+        findViewById<MaterialButton>(R.id.retryButton).setOnClickListener { load() }
 
         adapter = ServerGalleryAdapter(
             apiKey = prefs.apiKey,
@@ -113,6 +121,7 @@ class ServerGalleryActivity : AppCompatActivity() {
             return
         }
         swipe.isRefreshing = true
+        errorView.visibility = View.GONE
         lifecycleScope.launch {
             try {
                 val api = ServerApi(prefs.serverUrl, prefs.apiKey, prefs.username)
@@ -145,8 +154,9 @@ class ServerGalleryActivity : AppCompatActivity() {
                 emptyText.visibility = if (mediaItems.isEmpty()) View.VISIBLE else View.GONE
                 rows.firstOrNull()?.sectionLabel?.let { flashDatePill(it) }
             } catch (e: Exception) {
-                val msg = getString(R.string.server_gallery_error, e.message ?: "unknown error")
-                Toast.makeText(this@ServerGalleryActivity, msg, Toast.LENGTH_LONG).show()
+                emptyText.visibility = View.GONE
+                errorDetail.text = getString(R.string.server_gallery_offline_detail)
+                errorView.visibility = View.VISIBLE
             } finally {
                 swipe.isRefreshing = false
             }
