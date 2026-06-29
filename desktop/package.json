@@ -1,7 +1,7 @@
 {
   "name": "photoserver-desktop",
   "version": "0.1.0",
-  "description": "System-tray desktop app for PhotoServer (Windows): dashboard, background operation, auto-start, notifications.",
+  "description": "System-tray desktop app for PhotoSync Server (Windows): dashboard, background operation, auto-start, notifications.",
   "main": "src/main.js",
   "scripts": {
     "start": "node src/main.js",

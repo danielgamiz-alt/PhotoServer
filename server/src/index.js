@@ -1,6 +1,6 @@
 'use strict';
 
-// Headless CLI entry point. Thin wrapper around the PhotoServer module so the
+// Headless CLI entry point. Thin wrapper around the PhotoSync Server module so the
 // same server logic powers both this and the desktop tray app.
 
 const { load } = require('./config');

@@ -1,4 +1,4 @@
-// Tiny launcher compiled into PhotoServer.exe. Double-clicking it starts the
+// Tiny launcher compiled into PhotoSync Server.exe. Double-clicking it starts the
 // bundled Node runtime on the app (which opens the dashboard, shows the tray
 // icon, and runs the backup server in the background) and then exits — Node
 // keeps running on its own. Built as a Windows app so no console flashes.
@@ -18,8 +18,8 @@ class Launcher
         if (!File.Exists(node) || !File.Exists(main))
         {
             MessageBox.Show(
-                "PhotoServer files are missing. Please keep PhotoServer.exe inside its folder.",
-                "PhotoServer", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                "PhotoSync Server files are missing. Please keep PhotoSync Server.exe inside its folder.",
+                "PhotoSync Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
 
@@ -41,8 +41,8 @@ class Launcher
         }
         catch (Exception ex)
         {
-            MessageBox.Show("Could not start PhotoServer:\n" + ex.Message,
-                "PhotoServer", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show("Could not start PhotoSync Server:\n" + ex.Message,
+                "PhotoSync Server", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

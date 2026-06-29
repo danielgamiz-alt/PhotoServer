@@ -1,6 +1,6 @@
 # PhotoSync (Android app)
 
-Auto-uploads new photos/videos to your PhotoServer when the phone is on WiFi
+Auto-uploads new photos/videos to your PhotoSync Server when the phone is on WiFi
 and the server is reachable. See the [main README](../README.md) for the full
 setup guide.
 
