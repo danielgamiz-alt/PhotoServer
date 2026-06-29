@@ -210,6 +210,13 @@ async function route(req, res, deps) {
     return sendJson(res, 200, { ok: true });
   }
 
+  if (p === '/api/reindex' && req.method === 'POST') {
+    const storage = deps.getStorage();
+    if (!storage) throw httpError(503, 'storage not initialised');
+    const result = await storage.reindex();
+    return sendJson(res, 200, result);
+  }
+
   if (p === '/api/quit' && req.method === 'POST') {
     sendJson(res, 200, { ok: true });
     setTimeout(() => deps.onQuit(), 100);
