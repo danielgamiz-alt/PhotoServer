@@ -255,6 +255,11 @@
         </div>
 
         <div class="faq-item">
+          <p class="faq-q">Can I delete a photo from both my phone and the server at once?</p>
+          <p class="faq-a muted small">Yes — long-press any photo in the PhotoSync app to enter selection mode, then tap <b>Trash</b>. This removes it from your phone and tells the server to delete its copy too.<br><br>The Trash action requires an active connection to your server (same home Wi‑Fi, this app running). If the phone can't reach the server, the Trash button will be grayed out. You can still use <b>Delete from device</b> to remove the local copy, but the server copy will remain. There is currently no automatic retry, so if the connection is lost mid-delete the server copy will not be cleaned up later.</p>
+        </div>
+
+        <div class="faq-item">
           <p class="faq-q">Can I add photos to the server manually, without using the phone app?</p>
           <p class="faq-a muted small">Yes. PhotoSync Server stores photos as plain files on your PC, organised in folders by user and date — for example <code>PhotoSync\Alex\2026\06\photo.jpg</code>. You can copy any photo or video into that folder structure yourself, and the server will serve it normally.<br><br>The one extra step: the server keeps an index of all known files to avoid duplicates during upload. Files you copy in manually aren't in that index yet, so they won't appear in the "Photos on server" view on your phone until you click <b>Scan for new files</b> in the Server section of Settings above. The scan is instant and safe to run as many times as you like — it only adds files that aren't already indexed.<br><br><b>Folder layout:</b> create a subfolder named after the person (<code>Alex</code>, <code>Maria</code>, etc.) inside the backup folder, then year and month subfolders inside that, and drop your files in. Example: <code>PhotoSync\Alex\2026\06\IMG_1234.jpg</code>. If you don't need per-person folders, you can put files directly in the year/month path (<code>PhotoSync\2026\06\IMG_1234.jpg</code>) and they'll be attributed to the default account.</p>
         </div>

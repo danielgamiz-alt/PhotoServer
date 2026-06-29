@@ -44,6 +44,7 @@ class HelpActivity : AppCompatActivity() {
             R.id.qBackground to R.id.aBackground,
             R.id.qLocked to R.id.aLocked,
             R.id.qMissing to R.id.aMissing,
+            R.id.qDelete to R.id.aDelete,
             R.id.qManual to R.id.aManual,
             R.id.qFree to R.id.aFree,
         )

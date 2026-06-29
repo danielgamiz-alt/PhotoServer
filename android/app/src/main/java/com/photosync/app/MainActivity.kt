@@ -72,6 +72,7 @@ class MainActivity : AppCompatActivity() {
     // Selection UI (bottom bar replaces the filter pill; toolbar shows "✕ N")
     private lateinit var selectionBottomBar: View
     private lateinit var filterPill: View
+    private lateinit var selectionTrashBtn: View
 
     // Pending delete-from-device URIs; the system dialog resolves asynchronously on API 30+.
     private var pendingDeleteIds: List<Long> = emptyList()
@@ -183,7 +184,8 @@ class MainActivity : AppCompatActivity() {
 
         selectionBottomBar = findViewById(R.id.selectionBottomBar)
         filterPill = findViewById(R.id.filterPill)
-        findViewById<View>(R.id.selectionTrash).setOnClickListener {
+        selectionTrashBtn = findViewById(R.id.selectionTrash)
+        selectionTrashBtn.setOnClickListener {
             confirmDelete(alsoServer = true)
         }
         findViewById<View>(R.id.selectionDeleteDevice).setOnClickListener {
@@ -583,17 +585,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private var selectionUiActive = false
+
     private fun enterSelectionUi(count: Int) {
-        selectionBottomBar.visibility = View.VISIBLE
-        filterPill.visibility = View.GONE
         val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
-        toolbar.logo = null
-        toolbar.setNavigationIcon(R.drawable.ic_close)
-        toolbar.setNavigationOnClickListener { adapter.exitSelectionMode() }
         toolbar.title = getString(R.string.selection_count, count)
+
+        if (!selectionUiActive) {
+            selectionUiActive = true
+            selectionBottomBar.visibility = View.VISIBLE
+            filterPill.visibility = View.GONE
+            toolbar.logo = null
+            toolbar.setNavigationIcon(R.drawable.ic_close)
+            toolbar.setNavigationOnClickListener { adapter.exitSelectionMode() }
+
+            // Gray out Trash if server is not configured or unreachable.
+            val serverConfigured = prefs.serverUrl.isNotEmpty()
+            selectionTrashBtn.isEnabled = false
+            selectionTrashBtn.alpha = if (serverConfigured) 0.4f else 0.25f
+            if (serverConfigured) {
+                lifecycleScope.launch {
+                    val reachable = serverReachable()
+                    selectionTrashBtn.isEnabled = reachable
+                    selectionTrashBtn.alpha = if (reachable) 1f else 0.4f
+                }
+            }
+        }
     }
 
     private fun exitSelectionUi() {
+        selectionUiActive = false
         selectionBottomBar.visibility = View.GONE
         filterPill.visibility = View.VISIBLE
         val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
