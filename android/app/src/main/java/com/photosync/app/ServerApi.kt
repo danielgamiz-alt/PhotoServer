@@ -124,6 +124,17 @@ class ServerApi(
     /** HTTP URL to stream a file by hash; pass to Glide or ExoPlayer. */
     fun fileUrl(hash: String): String = "$baseUrl/api/file/$hash"
 
+    /**
+     * Asks the server to scan its storage folder for files that were copied
+     * there manually (not via the upload API) and add them to its index.
+     * Returns the number of newly discovered files.
+     */
+    fun reindex(): Int {
+        val conn = open("POST", "/api/reindex")
+        val body = readResponse(conn)
+        return JSONObject(body).optInt("added", 0)
+    }
+
     private fun open(
         method: String,
         path: String,

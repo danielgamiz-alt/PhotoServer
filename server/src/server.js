@@ -191,6 +191,14 @@ class PhotoServer extends EventEmitter {
       });
     }
 
+    // Scan the storage folder for files not yet in the index and add them.
+    // Useful when photos are copied manually into the storage directory.
+    if (req.method === 'POST' && url.pathname === '/api/reindex') {
+      const result = await storage.reindex();
+      this.emit('log', { level: 'info', message: `reindex: added ${result.added} file(s), total ${result.total}` });
+      return sendJson(res, 200, result);
+    }
+
     // List all files stored for this user, newest first.
     if (req.method === 'GET' && url.pathname === '/api/gallery') {
       const items = storage.list()

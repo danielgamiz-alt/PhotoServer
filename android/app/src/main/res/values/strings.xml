@@ -93,6 +93,10 @@
     <string name="status_pending">Not backed up yet</string>
 
     <string name="menu_server_gallery">Browse server photos</string>
+    <string name="menu_reindex">Scan for new files</string>
+    <string name="reindex_scanning">Scanning for new files…</string>
+    <string name="reindex_done_new">Found %1$d new file(s)</string>
+    <string name="reindex_done_none">No new files found</string>
     <string name="server_gallery_title">Photos on server</string>
     <string name="server_gallery_empty">No photos stored on the server yet</string>
     <string name="server_gallery_error">Could not load photos: %1$s</string>
