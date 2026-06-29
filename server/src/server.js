@@ -213,8 +213,17 @@ class PhotoServer extends EventEmitter {
       return sendJson(res, 200, { items });
     }
 
-    // Stream a stored file by its sha256 hash.
+    // Delete a stored file by its sha256 hash (removes this user's copy).
     const fileMatch = /^\/api\/file\/([a-f0-9]{64})$/.exec(url.pathname);
+    if (req.method === 'DELETE' && fileMatch) {
+      const hash = fileMatch[1];
+      const removed = await storage.remove(hash, username);
+      if (!removed) throw httpError(404, 'file not found');
+      this.emit('log', { level: 'info', message: `deleted ${hash} (${username})` });
+      return sendJson(res, 200, { removed: true });
+    }
+
+    // Stream a stored file by its sha256 hash.
     if (req.method === 'GET' && fileMatch) {
       const hash = fileMatch[1];
       const entry = storage.get(hash, username);

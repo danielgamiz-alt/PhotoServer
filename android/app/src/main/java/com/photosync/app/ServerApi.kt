@@ -124,6 +124,12 @@ class ServerApi(
     /** HTTP URL to stream a file by hash; pass to Glide or ExoPlayer. */
     fun fileUrl(hash: String): String = "$baseUrl/api/file/$hash"
 
+    /** Deletes this user's copy of [hash] from the server. */
+    fun deleteFile(hash: String) {
+        val conn = open("DELETE", "/api/file/$hash")
+        readResponse(conn)
+    }
+
     /**
      * Asks the server to scan its storage folder for files that were copied
      * there manually (not via the upload API) and add them to its index.

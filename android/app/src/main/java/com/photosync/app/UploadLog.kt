@@ -60,6 +60,18 @@ class UploadLog private constructor(context: Context) :
         }
     }
 
+    /** Returns the stored hash for a MediaStore item, or null if not uploaded. */
+    fun hashForMediaId(mediaId: Long): String? {
+        readableDatabase.rawQuery(
+            "SELECT hash FROM uploaded WHERE media_id = ?", arrayOf(mediaId.toString())
+        ).use { c -> return if (c.moveToFirst()) c.getString(0) else null }
+    }
+
+    /** Removes the upload record for a single MediaStore item. */
+    fun deleteByMediaId(mediaId: Long) {
+        writableDatabase.delete("uploaded", "media_id = ?", arrayOf(mediaId.toString()))
+    }
+
     /**
      * Forgets all backed-up records. Used when the account changes, since
      * "uploaded" is tracked per server folder — a new user starts empty.

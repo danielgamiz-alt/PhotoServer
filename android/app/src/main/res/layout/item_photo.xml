@@ -21,4 +21,20 @@
         android:background="@drawable/badge_bg"
         android:padding="3dp" />
 
+    <!-- Selection overlay: semi-transparent tint + check icon (single container) -->
+    <FrameLayout
+        android:id="@+id/checkOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#66000000"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_check_circle" />
+    </FrameLayout>
+
 </FrameLayout>

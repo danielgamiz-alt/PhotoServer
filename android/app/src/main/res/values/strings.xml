@@ -109,6 +109,20 @@
     <string name="download">Download to device</string>
     <string name="server_not_configured">Set up your server in Settings first</string>
 
+    <!-- Selection / delete -->
+    <string name="selection_cancel">Cancel selection</string>
+    <string name="selection_count">%1$d selected</string>
+    <string name="delete_from_device">Delete from device</string>
+    <string name="delete_everywhere">Delete everywhere</string>
+    <string name="delete_device_confirm_title">Delete from device?</string>
+    <string name="delete_device_confirm_msg">The selected photo(s) will be removed from this phone. Your server backup will not be affected.</string>
+    <string name="delete_everywhere_confirm_title">Delete everywhere?</string>
+    <string name="delete_everywhere_confirm_msg">The selected photo(s) will be permanently deleted from this phone AND from your server. This cannot be undone.</string>
+    <string name="delete_confirm_ok">Delete</string>
+    <string name="delete_confirm_cancel">Cancel</string>
+    <string name="delete_done">Deleted %1$d item(s)</string>
+    <string name="delete_server_error">Deleted from device. Could not reach server: %1$s</string>
+
     <string name="back">Back</string>
     <string name="photo">Photo</string>
     <string name="play_video">Play video</string>
