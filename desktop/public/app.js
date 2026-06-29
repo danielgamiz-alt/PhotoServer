@@ -217,6 +217,21 @@ function action(fn) {
 }
 
 // ---- actions ---------------------------------------------------------------
+$('reindexBtn').onclick = async () => {
+  const hint = $('reindexHint');
+  hint.textContent = 'Scanning…';
+  $('reindexBtn').disabled = true;
+  try {
+    const res = await api('/api/reindex', 'POST');
+    hint.textContent = res.added > 0 ? `Found ${res.added} new file(s) ✓` : 'No new files found';
+    if (res.added > 0) render(await api('/api/status'));
+  } catch (e) {
+    hint.textContent = e.message || 'Scan failed';
+  }
+  $('reindexBtn').disabled = false;
+  setTimeout(() => { hint.textContent = ''; }, 5000);
+};
+
 $('toggleServer').onclick = action(async () => {
   const running = lastStatus && lastStatus.running;
   render(await api('/api/server', 'POST', { action: running ? 'stop' : 'start' }));

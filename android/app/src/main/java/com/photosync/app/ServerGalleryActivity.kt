@@ -5,8 +5,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -76,40 +74,28 @@ class ServerGalleryActivity : AppCompatActivity() {
         grid.adapter = adapter
         grid.addOnScrollListener(scrollListener)
 
-        swipe.setOnRefreshListener { load() }
+        swipe.setOnRefreshListener { reindexAndLoad() }
 
         load()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.menu_server_gallery, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.action_reindex) {
-            reindex()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    private fun reindex() {
-        Toast.makeText(this, R.string.reindex_scanning, Toast.LENGTH_SHORT).show()
+    /** Scans for manually-added files, then refreshes the gallery. */
+    private fun reindexAndLoad() {
         lifecycleScope.launch {
             try {
                 val api = ServerApi(prefs.serverUrl, prefs.apiKey, prefs.username)
                 val added = withContext(Dispatchers.IO) { api.reindex() }
-                val msg = if (added > 0)
-                    getString(R.string.reindex_done_new, added)
-                else
-                    getString(R.string.reindex_done_none)
-                Toast.makeText(this@ServerGalleryActivity, msg, Toast.LENGTH_LONG).show()
-                if (added > 0) load()
-            } catch (e: Exception) {
-                val msg = getString(R.string.server_gallery_error, e.message ?: "unknown error")
-                Toast.makeText(this@ServerGalleryActivity, msg, Toast.LENGTH_LONG).show()
+                if (added > 0) {
+                    Toast.makeText(
+                        this@ServerGalleryActivity,
+                        getString(R.string.reindex_done_new, added),
+                        Toast.LENGTH_LONG,
+                    ).show()
+                }
+            } catch (_: Exception) {
+                // Reindex failure is non-fatal — still refresh the list.
             }
+            load()
         }
     }
 

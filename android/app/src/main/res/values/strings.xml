@@ -167,6 +167,9 @@
     <string name="help_q_missing">Why haven\'t my latest photos backed up yet?</string>
     <string name="help_a_missing">Check that you\'re on your home Wi‑Fi and the computer is on. Backups run periodically and resume on their own — pull down on the gallery to refresh, or use \"Sync now\".</string>
 
+    <string name="help_q_manual">Can I add photos to the server manually?</string>
+    <string name="help_a_manual">Yes. PhotoSync Server stores photos as plain files on your PC, organised in folders by user and date — for example PhotoSync\Alex\2026\06\photo.jpg. You can copy any photo or video into that folder structure yourself and the server will serve it normally.\n\nThe one extra step: the server keeps an index of known files to avoid duplicates during upload. Files copied in manually aren\'t in that index yet, so they won\'t appear in \"Photos on server\" until you scan for them. To do that, open the PhotoSync Server app on your PC, go to Settings, and click Scan for new files. The scan is instant and safe to run repeatedly — it only adds what isn\'t already indexed.\n\nFolder layout: create a subfolder named after the person (Alex, Maria…) inside the backup folder, then year and month subfolders inside that. Example: PhotoSync\Alex\2026\06\IMG_1234.jpg. If you skip the person\'s name folder, files land under the default account instead.</string>
+
     <string name="help_q_free">Is it really free?</string>
     <string name="help_a_free">Yes. PhotoSync is free and open source, and because the storage is your own computer there\'s no subscription and no limit beyond your own drive. It\'s built by one person on evenings and weekends — if it\'s useful to you, a small tip helps keep it going (entirely optional).</string>
 
