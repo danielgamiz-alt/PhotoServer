@@ -54,6 +54,15 @@
                 android:textColor="#CCFFFFFF"
                 android:textSize="12sp" />
         </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/viewerDownload"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/download"
+            android:src="@drawable/ic_download"
+            android:visibility="gone" />
     </LinearLayout>
 
 </FrameLayout>

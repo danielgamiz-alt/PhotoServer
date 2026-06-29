@@ -65,6 +65,12 @@
             android:theme="@style/Theme.PhotoSync.Viewer" />
 
         <activity
+            android:name=".ServerGalleryActivity"
+            android:exported="false"
+            android:label="@string/server_gallery_title"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
             android:name=".BackupSourceActivity"
             android:exported="false"
             android:label="@string/backup_source_title"

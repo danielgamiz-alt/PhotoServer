@@ -294,6 +294,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 true
             }
+            R.id.action_server_gallery -> {
+                startActivity(Intent(this, ServerGalleryActivity::class.java))
+                true
+            }
             R.id.action_invite -> {
                 shareApp()
                 true

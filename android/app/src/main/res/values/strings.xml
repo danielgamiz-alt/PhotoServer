@@ -92,6 +92,15 @@
     <string name="status_uploading">Uploading…</string>
     <string name="status_pending">Not backed up yet</string>
 
+    <string name="menu_server_gallery">Browse server photos</string>
+    <string name="server_gallery_title">Photos on server</string>
+    <string name="server_gallery_empty">No photos stored on the server yet</string>
+    <string name="server_gallery_error">Could not load photos: %1$s</string>
+    <string name="downloading">Downloading…</string>
+    <string name="download_complete">Saved to Pictures</string>
+    <string name="download">Download to device</string>
+    <string name="server_not_configured">Set up your server in Settings first</string>
+
     <string name="back">Back</string>
     <string name="photo">Photo</string>
     <string name="play_video">Play video</string>
