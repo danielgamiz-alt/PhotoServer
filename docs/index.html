@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PhotoSync — Download for Android</title>
+<title>PhotoSync — Private photo backup</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
   * { box-sizing: border-box; }
@@ -12,47 +12,64 @@
     font-family: -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
     line-height: 1.6;
   }
-  main { max-width: 560px; margin: 0 auto; padding: 40px 20px 64px; }
-  .hero { text-align: center; }
-  .icon { width: 96px; height: 96px; margin: 0 auto 20px; }
-  h1 { font-size: 32px; margin: 0 0 6px; font-weight: 600; }
-  .tag { color: var(--muted); margin: 0 auto 28px; max-width: 30em; }
+  main { max-width: 520px; margin: 0 auto; padding: 48px 20px 64px; }
+
+  /* Hero */
+  .hero { text-align: center; margin-bottom: 48px; }
+  .icon { width: 80px; height: 80px; margin: 0 auto 16px; }
+  h1 { font-size: 30px; margin: 0 0 6px; font-weight: 700; }
+  .tag { color: var(--muted); margin: 0 0 28px; }
+
+  /* Download buttons */
+  .downloads { display: flex; flex-direction: column; gap: 12px; align-items: center; }
   .btn {
     display: inline-block; background: var(--accent); color: #fff;
-    text-decoration: none; font-weight: 600; font-size: 17px;
-    padding: 14px 28px; border-radius: 14px;
+    text-decoration: none; font-weight: 600; font-size: 16px;
+    padding: 13px 26px; border-radius: 12px; min-width: 240px; text-align: center;
   }
+  .btn.secondary { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
   .btn:active { opacity: .85; }
-  .ver { color: var(--muted); font-size: 13px; margin-top: 10px; }
-  .qr { margin: 32px auto 0; }
-  .qr .card { background: #fff; display: inline-block; padding: 14px; border-radius: 16px; }
-  .qr #qrcode img, .qr #qrcode canvas { display: block; }
-  .qr span { display: block; color: var(--muted); font-size: 13px; margin-top: 10px; }
-  section { margin-top: 44px; }
-  h2 { font-size: 20px; font-weight: 600; margin: 0 0 16px; }
-  .step {
-    display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 14px; padding: 16px; margin-bottom: 12px;
-  }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  /* QR */
+  .qr { margin: 28px auto 0; text-align: center; }
+  .qr .card { background: #fff; display: inline-block; padding: 12px; border-radius: 14px; }
+  .qr span { display: block; color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+  /* Sections */
+  section { margin-top: 40px; }
+  h2 { font-size: 18px; font-weight: 600; margin: 0 0 14px; }
+
+  /* Steps */
+  .step { display: flex; gap: 12px; margin-bottom: 10px; }
   .num {
-    flex: 0 0 28px; height: 28px; border-radius: 50%; background: var(--accent);
-    color: #fff; font-weight: 600; display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
+    flex: 0 0 26px; height: 26px; border-radius: 50%; background: var(--accent);
+    color: #fff; font-weight: 600; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
   }
-  .step h3 { margin: 2px 0 4px; font-size: 16px; font-weight: 600; }
-  .step p { margin: 0; color: var(--muted); font-size: 15px; }
-  .step p + p { margin-top: 8px; }
-  .step ul { margin: 6px 0 0; padding-left: 20px; color: var(--muted); font-size: 15px; }
-  .step li { margin: 4px 0; }
-  .step li b { color: var(--text); }
-  .note { background: var(--surface-2); border-radius: 12px; padding: 14px 16px; color: var(--muted); font-size: 14px; }
-  .note b { color: var(--text); font-weight: 600; }
-  a { color: #a98bff; }
-  footer { margin-top: 48px; text-align: center; color: var(--muted); font-size: 13px; }
+  .step-body { padding-top: 3px; font-size: 15px; color: var(--muted); }
+  .step-body b { color: var(--text); }
+
+  /* Note / callout */
+  .note { background: var(--surface-2); border-radius: 10px; padding: 12px 14px; color: var(--muted); font-size: 14px; margin-top: 10px; }
+  .note b { color: var(--text); }
+
+  /* FAQ */
+  .faq { margin-top: 8px; }
+  details { border-bottom: 1px solid var(--border); padding: 10px 0; }
+  details:first-child { border-top: 1px solid var(--border); }
+  summary { font-size: 15px; font-weight: 500; cursor: pointer; list-style: none; display: flex; justify-content: space-between; }
+  summary::after { content: "+"; color: var(--muted); }
+  details[open] summary::after { content: "−"; }
+  details p { margin: 8px 0 4px; color: var(--muted); font-size: 14px; }
+
+  a { color: var(--accent); }
+  footer { margin-top: 56px; text-align: center; color: var(--muted); font-size: 13px; }
 </style>
 </head>
 <body>
 <main>
+
   <div class="hero">
     <div class="icon">
       <svg viewBox="0 0 108 108" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PhotoSync icon">
@@ -67,80 +84,71 @@
       </svg>
     </div>
     <h1>PhotoSync</h1>
-    <p class="tag">Back up your phone's photos and videos to your family's own computer — free, private, no cloud subscription.</p>
-    <a class="btn" href="https://github.com/danielgamiz-alt/PhotoServer/releases/latest/download/PhotoSync.apk">Download for Android</a>
-    <div class="ver">Android 8.0 or newer · free</div>
+    <p class="tag">Back up your phone's photos to your own computer.<br>Free, private, no cloud subscription.</p>
+    <div class="downloads">
+      <div>
+        <a class="btn" href="https://github.com/danielgamiz-alt/PhotoServer/releases/latest/download/PhotoSync.apk">Download for Android</a>
+        <p class="sub">Android 8.0 or newer</p>
+      </div>
+      <div>
+        <a class="btn secondary" href="https://github.com/danielgamiz-alt/PhotoServer/releases/latest/download/PhotoSync-Server-Windows.zip">Server for Windows</a>
+        <p class="sub">Required on the home PC</p>
+      </div>
+    </div>
     <div class="qr">
       <div class="card"><div id="qrcode"></div></div>
-      <span>Or scan with your phone's camera</span>
+      <span>Scan to download the Android app</span>
     </div>
   </div>
 
   <section>
-    <h2>First, install the app on your phone</h2>
+    <h2>Setup — phone (one time)</h2>
     <div class="step">
       <div class="num">1</div>
-      <div><h3>Download &amp; open</h3><p>Tap the button above, then open the downloaded <b>.apk</b> file.</p></div>
+      <div class="step-body">Tap <b>Download for Android</b> above, then open the <b>.apk</b> file.</div>
     </div>
     <div class="step">
       <div class="num">2</div>
-      <div><h3>Allow the install</h3><p>Android will say it's from an "unknown source" — this is normal for apps outside the Play Store. Tap <b>Settings</b>, turn on <b>Allow from this source</b>, then go back and tap <b>Install</b>.</p></div>
+      <div class="step-body">Android will warn "unknown source" — tap <b>Settings → Allow from this source → Install</b>. If Play Protect asks, tap <b>Install anyway</b>.</div>
     </div>
     <div class="step">
       <div class="num">3</div>
-      <div><h3>If you see a warning</h3><p>If Play Protect shows "unsafe app", tap <b>More details → Install anyway</b>. (It flags anything not from the Play Store.)</p></div>
-    </div>
-    <div class="step">
-      <div class="num">4</div>
-      <div><h3>Open &amp; connect</h3><p>Open <b>PhotoSync</b>, allow photo access, enter your name, and tap <b>Find server</b> while on your home Wi‑Fi. Done — your photos start backing up.</p></div>
+      <div class="step-body">Open <b>PhotoSync</b>, allow photo access, enter your name, and tap <b>Find server</b> while on home Wi‑Fi.</div>
     </div>
   </section>
 
   <section>
-    <h2>Second, set up the home computer</h2>
-    <p class="note">Your photos go to <b>PhotoSync Server</b> — a small free program on the household's Windows PC that keeps them on your own drive. Set it up <b>once</b> (about a minute) and it then starts on its own every time the computer is turned on.</p>
-    <div class="step" style="margin-top:16px">
+    <h2>Setup — home PC (one time)</h2>
+    <div class="step">
       <div class="num">1</div>
-      <div><h3>Download &amp; unzip</h3><p>On the home PC, download <b>PhotoSync Server for Windows</b> below and right‑click the <b>.zip → Extract All</b>. Keep the folder somewhere like Documents.</p></div>
+      <div class="step-body">Download <b>Server for Windows</b> above, right-click the .zip → <b>Extract All</b>, and keep the folder in Documents.</div>
     </div>
     <div class="step">
       <div class="num">2</div>
-      <div><h3>Double‑click PhotoServer</h3><p>Open <b>PhotoServer</b> inside the folder. If Windows shows "Windows protected your PC", click <b>More info → Run anyway</b> (normal for free apps outside the Store).</p></div>
+      <div class="step-body">Double-click <b>PhotoServer.exe</b>. If Windows says "protected your PC", click <b>More info → Run anyway</b>.</div>
     </div>
     <div class="step">
       <div class="num">3</div>
-      <div><h3>Choose where photos go</h3><p>A dashboard opens and a green icon appears by the clock. Click <b>Browse…</b> and pick a folder (an external drive is ideal). That's it — it now runs automatically in the background from every restart.</p></div>
+      <div class="step-body">A dashboard opens. Click <b>Browse…</b> and pick a folder for your photos. Done — it starts automatically on every restart.</div>
     </div>
-    <p style="text-align:center; margin-top:8px">
-      <a class="btn" href="https://github.com/danielgamiz-alt/PhotoServer/releases/latest/download/PhotoSync-Server-Windows.zip">Download for Windows</a>
-    </p>
-    <p class="note" style="margin-top:16px">Your phone only backs up while it's on the same Wi‑Fi as this computer and the computer is on.</p>
+    <p class="note">Your phone backs up while it's on the <b>same Wi‑Fi as the PC</b> and the PC is on.</p>
   </section>
 
   <section>
-    <h2>How it works</h2>
-    <div class="step">
-      <div><h3>Why only on home Wi‑Fi?</h3><p>Your photos go straight to your family's own computer — not to a company's cloud. Your phone can only reach that computer when both are on the same home Wi‑Fi, so backups pause on mobile data or other networks and resume automatically once you're home. That's what keeps it private and free.</p></div>
-    </div>
-    <div class="step">
-      <div><h3>Are my photos on the internet?</h3><p>No. They stay on your own computer's drive at home. Nothing is sent to the cloud or to us.</p></div>
-    </div>
-    <div class="step">
-      <div><h3>Do I have to keep the app open?</h3><p>No. Once set up, it backs up automatically in the background while you're on home Wi‑Fi. There's also a "How it works" page inside the app if you ever forget the details.</p></div>
-    </div>
-    <div class="step">
-      <div><h3>Why doesn't it upload automatically right away?</h3><p>It does back up on its own — but not always instantly. To save battery, Android strictly limits what apps are allowed to do in the background, so a new photo can take a while to upload, and longer if the phone has been sitting locked and untouched. Nothing is ever lost: it always catches up. (This is also why a single photo backs up the moment you open the app, but the rest trickle in afterwards.)</p><p>To make backups happen sooner:</p><ul><li><b>Plug the phone in to charge.</b> Android lifts its background limits while charging, so this is when most backups happen — the same way your phone does its overnight work. On Wi‑Fi and charging is the sweet spot.</li><li><b>Stay on your home Wi‑Fi</b>, and make sure it isn't set to <b>Metered</b> (Wi‑Fi settings → your network). A "metered" Wi‑Fi pauses automatic backups.</li><li><b>Want it now? Just open PhotoSync.</b> Opening the app always kicks off a backup immediately.</li></ul></div>
-    </div>
-  </section>
-
-  <section style="text-align:center">
-    <h2>Share with your friends</h2>
-    <p class="note" style="margin-bottom:20px">Know someone who's tired of paying for photo storage? Send them this page — they can set up their own free backups in a few minutes.</p>
-    <button class="btn" id="shareBtn" type="button">Share PhotoSync</button>
-    <span id="shareCopied" class="ver" style="display:none">Link copied — paste it to a friend 🎉</span>
-    <div class="qr" style="margin-top:28px">
-      <div class="card"><div id="qrcode-page"></div></div>
-      <span>…or show them this code to scan</span>
+    <h2>Common questions</h2>
+    <div class="faq">
+      <details>
+        <summary>Are my photos on the internet?</summary>
+        <p>No. They go straight to your own PC's hard drive. Nothing is uploaded to any cloud or third party.</p>
+      </details>
+      <details>
+        <summary>Why only on home Wi‑Fi?</summary>
+        <p>Your phone talks directly to your home computer, so both need to be on the same network. Backups pause on mobile data and resume automatically when you get home.</p>
+      </details>
+      <details>
+        <summary>Why doesn't a new photo back up instantly?</summary>
+        <p>Android limits background activity to save battery. Photos trickle in — especially while the phone is charging on Wi‑Fi. To force an immediate backup, just open the app.</p>
+      </details>
     </div>
   </section>
 
@@ -148,49 +156,16 @@
     Free &amp; open source · <a href="https://github.com/danielgamiz-alt/PhotoServer">github.com/danielgamiz-alt/PhotoServer</a><br>
     Your photos stay on your own hardware.
   </footer>
-</main>
 
+</main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
   new QRCode(document.getElementById("qrcode"), {
     text: "https://github.com/danielgamiz-alt/PhotoServer/releases/latest/download/PhotoSync.apk",
-    width: 180, height: 180,
-    colorDark: "#101114", colorLight: "#ffffff",
-    correctLevel: QRCode.CorrectLevel.M
-  });
-  new QRCode(document.getElementById("qrcode-page"), {
-    text: "https://danielgamiz-alt.github.io/PhotoServer/",
     width: 160, height: 160,
     colorDark: "#101114", colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.M
   });
-
-  // "Share with your friends": use the native share sheet (WhatsApp, Messages,
-  // email…) on phones; fall back to WhatsApp on desktop, then copy-to-clipboard
-  // so there's always a one-tap way to pass the link along.
-  (function () {
-    var pageUrl = "https://danielgamiz-alt.github.io/PhotoServer/";
-    var msg = "I'm using PhotoSync to back up my phone's photos to my own computer — free, no cloud subscription. Set it up here: " + pageUrl;
-    var btn = document.getElementById("shareBtn");
-    var copied = document.getElementById("shareCopied");
-    function flashCopied() {
-      copied.style.display = "block";
-      setTimeout(function () { copied.style.display = "none"; }, 4000);
-    }
-    btn.addEventListener("click", function () {
-      if (navigator.share) {
-        navigator.share({ title: "PhotoSync", text: msg, url: pageUrl }).catch(function () {});
-        return;
-      }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(msg).then(flashCopied).catch(function () {
-          window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
-        });
-        return;
-      }
-      window.open("https://wa.me/?text=" + encodeURIComponent(msg), "_blank");
-    });
-  })();
 </script>
 </body>
 </html>
