@@ -8,6 +8,10 @@
         android:title="@string/sync_now" />
 
     <item
+        android:id="@+id/action_server_gallery"
+        android:title="@string/menu_server_gallery" />
+
+    <item
         android:id="@+id/action_settings"
         android:title="@string/menu_settings" />
 

@@ -7,6 +7,14 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
+data class ServerGalleryItem(
+    val hash: String,
+    val name: String,
+    val takenAt: Long,
+    val size: Long,
+    val type: String,
+)
+
 data class ServerHealth(
     val serverId: String,
     val name: String,
@@ -92,6 +100,45 @@ class ServerApi(
         val body = readResponse(conn)
         val json = JSONObject(body)
         return UploadResult(stored = json.optBoolean("stored"), path = json.optString("path"))
+    }
+
+    /** Returns all files stored on the server for this user, newest first. */
+    fun listGallery(): List<ServerGalleryItem> {
+        val conn = open("GET", "/api/gallery")
+        val body = readResponse(conn)
+        val arr = JSONObject(body).getJSONArray("items")
+        return buildList {
+            for (i in 0 until arr.length()) {
+                val obj = arr.getJSONObject(i)
+                add(ServerGalleryItem(
+                    hash = obj.getString("hash"),
+                    name = obj.getString("name"),
+                    takenAt = obj.getLong("takenAt"),
+                    size = obj.getLong("size"),
+                    type = obj.getString("type"),
+                ))
+            }
+        }
+    }
+
+    /** HTTP URL to stream a file by hash; pass to Glide or ExoPlayer. */
+    fun fileUrl(hash: String): String = "$baseUrl/api/file/$hash"
+
+    /** Deletes this user's copy of [hash] from the server. */
+    fun deleteFile(hash: String) {
+        val conn = open("DELETE", "/api/file/$hash")
+        readResponse(conn)
+    }
+
+    /**
+     * Asks the server to scan its storage folder for files that were copied
+     * there manually (not via the upload API) and add them to its index.
+     * Returns the number of newly discovered files.
+     */
+    fun reindex(): Int {
+        val conn = open("POST", "/api/reindex")
+        val body = readResponse(conn)
+        return JSONObject(body).optInt("added", 0)
     }
 
     private fun open(

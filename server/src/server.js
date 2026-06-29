@@ -1,10 +1,12 @@
 'use strict';
 
+const fs = require('fs');
 const http = require('http');
 const os = require('os');
+const path = require('path');
 const EventEmitter = require('events');
 
-const { Storage, sanitizeUsername } = require('./storage');
+const { Storage, sanitizeUsername, isVideoName } = require('./storage');
 const discovery = require('./discovery');
 
 const VERSION = '0.1.0';
@@ -189,6 +191,50 @@ class PhotoServer extends EventEmitter {
       });
     }
 
+    // Scan the storage folder for files not yet in the index and add them.
+    // Useful when photos are copied manually into the storage directory.
+    if (req.method === 'POST' && url.pathname === '/api/reindex') {
+      const result = await storage.reindex();
+      this.emit('log', { level: 'info', message: `reindex: added ${result.added} file(s), total ${result.total}` });
+      return sendJson(res, 200, result);
+    }
+
+    // List all files stored for this user, newest first.
+    if (req.method === 'GET' && url.pathname === '/api/gallery') {
+      const items = storage.list()
+        .filter((item) => item.user === username)
+        .map((item) => ({
+          hash: item.hash,
+          name: item.name,
+          takenAt: item.takenAt,
+          size: item.size,
+          type: item.type,
+        }));
+      return sendJson(res, 200, { items });
+    }
+
+    // Delete a stored file by its sha256 hash (removes this user's copy).
+    const fileMatch = /^\/api\/file\/([a-f0-9]{64})$/.exec(url.pathname);
+    if (req.method === 'DELETE' && fileMatch) {
+      const hash = fileMatch[1];
+      const removed = await storage.remove(hash, username);
+      if (!removed) throw httpError(404, 'file not found');
+      this.emit('log', { level: 'info', message: `deleted ${hash} (${username})` });
+      return sendJson(res, 200, { removed: true });
+    }
+
+    // Stream a stored file by its sha256 hash.
+    if (req.method === 'GET' && fileMatch) {
+      const hash = fileMatch[1];
+      const entry = storage.get(hash, username);
+      if (!entry) throw httpError(404, 'file not found');
+      const abs = path.join(storage.root, entry.path);
+      const mime = mimeFor(path.extname(entry.path));
+      res.writeHead(200, { 'content-type': mime, 'content-length': String(entry.size || 0) });
+      fs.createReadStream(abs).pipe(res);
+      return;
+    }
+
     throw httpError(404, `no route for ${req.method} ${url.pathname}`);
   }
 }
@@ -233,6 +279,22 @@ function httpError(statusCode, message) {
   const err = new Error(message);
   err.statusCode = statusCode;
   return err;
+}
+
+const IMAGE_MIMES = new Map([
+  ['.jpg', 'image/jpeg'], ['.jpeg', 'image/jpeg'], ['.png', 'image/png'],
+  ['.gif', 'image/gif'], ['.webp', 'image/webp'], ['.heic', 'image/heic'],
+  ['.heif', 'image/heif'],
+]);
+const VIDEO_MIMES = new Map([
+  ['.mp4', 'video/mp4'], ['.mov', 'video/quicktime'], ['.m4v', 'video/x-m4v'],
+  ['.3gp', 'video/3gpp'], ['.mkv', 'video/x-matroska'], ['.webm', 'video/webm'],
+  ['.avi', 'video/x-msvideo'], ['.wmv', 'video/x-ms-wmv'],
+]);
+
+function mimeFor(ext) {
+  const e = ext.toLowerCase();
+  return IMAGE_MIMES.get(e) || VIDEO_MIMES.get(e) || 'application/octet-stream';
 }
 
 function lanAddresses() {

@@ -181,6 +181,44 @@
             android:visibility="gone" />
 
         <TextView
+            android:id="@+id/qDelete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingVertical="12dp"
+            android:text="@string/help_q_delete"
+            android:textAppearance="?attr/textAppearanceTitleSmall" />
+
+        <TextView
+            android:id="@+id/aDelete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/help_a_delete"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="@color/text_secondary"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/qManual"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:paddingVertical="12dp"
+            android:text="@string/help_q_manual"
+            android:textAppearance="?attr/textAppearanceTitleSmall" />
+
+        <TextView
+            android:id="@+id/aManual"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/help_a_manual"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="@color/text_secondary"
+            android:visibility="gone" />
+
+        <TextView
             android:id="@+id/qFree"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

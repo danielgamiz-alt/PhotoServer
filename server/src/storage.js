@@ -203,6 +203,69 @@ class Storage {
   }
 
   /**
+   * Scans the storage folder for image/video files not yet in the index,
+   * hashes each one, infers the owner and capture date from the path
+   * structure (username/YYYY/MM/ or YYYY/MM/ for the default user), and
+   * adds them. Safe to call repeatedly — already-indexed files are skipped.
+   *
+   * Returns { added, total } where total is the new index size.
+   */
+  async reindex() {
+    // Collect paths and hashes already known so we can skip them fast.
+    const knownPaths = new Set();
+    for (const byUser of Object.values(this.index)) {
+      for (const entry of Object.values(byUser)) knownPaths.add(entry.path);
+    }
+
+    let added = 0;
+    const scan = async (dir) => {
+      let entries;
+      try { entries = await fsp.readdir(dir, { withFileTypes: true }); }
+      catch { return; }
+
+      for (const entry of entries) {
+        if (entry.name.startsWith('.')) continue;
+        if (entry.name === 'index.json' || entry.name === 'index.json.tmp') continue;
+        const abs = path.join(dir, entry.name);
+
+        if (entry.isDirectory()) {
+          if (entry.name === '.incoming') continue;
+          await scan(abs);
+        } else if (entry.isFile()) {
+          const relPath = path.relative(this.root, abs).split(path.sep).join('/');
+          if (knownPaths.has(relPath)) continue;
+          if (!isImageName(relPath) && !isVideoName(relPath)) continue;
+
+          const parsed = parseStoragePath(relPath);
+          if (!parsed) continue;
+
+          // Skip if this user already has an index entry at a different path
+          // for the same content (detect via hash after the path check).
+          const stat = await fsp.stat(abs).catch(() => null);
+          if (!stat) continue;
+          const hash = await hashFile(abs);
+
+          if (!this.index[hash]) this.index[hash] = {};
+          if (this.index[hash][parsed.user]) continue; // already indexed for this user
+
+          this.index[hash][parsed.user] = {
+            path: relPath,
+            size: stat.size,
+            storedAt: stat.mtimeMs,
+            takenAt: parsed.takenAt,
+          };
+          knownPaths.add(relPath);
+          added++;
+        }
+      }
+    };
+
+    await scan(this.root);
+    if (added > 0) await this.saveIndex();
+    return { added, total: this.count() };
+  }
+
+  /**
    * Moves a temp file into <user>/<YYYY>/<MM>/ (named users) or <YYYY>/<MM>/
    * (the default user, at the root), de-duplicating filename collisions.
    */
@@ -230,9 +293,46 @@ class Storage {
 }
 
 const VIDEO_EXTS = new Set(['.mp4', '.mov', '.m4v', '.3gp', '.mkv', '.webm', '.avi', '.wmv']);
+const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif', '.bmp', '.tiff', '.tif']);
 
 function isVideoName(name) {
   return VIDEO_EXTS.has(path.extname(name).toLowerCase());
+}
+
+function isImageName(name) {
+  return IMAGE_EXTS.has(path.extname(name).toLowerCase());
+}
+
+/**
+ * Parses a relative storage path into { user, takenAt }.
+ * Supports two layouts:
+ *   YYYY/MM/filename          → default user, date = first of that month
+ *   username/YYYY/MM/filename → that user,    date = first of that month
+ * Returns null for paths that don't match either layout.
+ */
+function parseStoragePath(relPath) {
+  const parts = relPath.split('/');
+  let user, year, month;
+  if (parts.length === 3 && /^\d{4}$/.test(parts[0]) && /^\d{2}$/.test(parts[1])) {
+    user = DEFAULT_USER;
+    [year, month] = [parseInt(parts[0]), parseInt(parts[1]) - 1];
+  } else if (parts.length === 4 && /^\d{4}$/.test(parts[1]) && /^\d{2}$/.test(parts[2])) {
+    user = parts[0];
+    [year, month] = [parseInt(parts[1]), parseInt(parts[2]) - 1];
+  } else {
+    return null;
+  }
+  return { user, takenAt: new Date(year, month, 1).getTime() };
+}
+
+function hashFile(abs) {
+  return new Promise((resolve, reject) => {
+    const hasher = crypto.createHash('sha256');
+    fs.createReadStream(abs)
+      .on('data', (chunk) => hasher.update(chunk))
+      .on('end', () => resolve(hasher.digest('hex')))
+      .on('error', reject);
+  });
 }
 
 const FORBIDDEN_CHARS = '<>:"/\\|?*';

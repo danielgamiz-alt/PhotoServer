@@ -210,6 +210,21 @@ async function route(req, res, deps) {
     return sendJson(res, 200, { ok: true });
   }
 
+  const fileDeleteMatch = /^\/api\/file\/([a-f0-9]{64})$/.exec(p);
+  if (fileDeleteMatch && req.method === 'DELETE') {
+    const hash = fileDeleteMatch[1];
+    const removed = await deps.deleteMedia([hash]);
+    if (!removed) throw httpError(404, 'file not found');
+    return sendJson(res, 200, { removed: true });
+  }
+
+  if (p === '/api/reindex' && req.method === 'POST') {
+    const storage = deps.getStorage();
+    if (!storage) throw httpError(503, 'storage not initialised');
+    const result = await storage.reindex();
+    return sendJson(res, 200, result);
+  }
+
   if (p === '/api/quit' && req.method === 'POST') {
     sendJson(res, 200, { ok: true });
     setTimeout(() => deps.onQuit(), 100);

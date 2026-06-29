@@ -1,6 +1,7 @@
 package com.photosync.app
 
 import android.Manifest
+import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,6 +17,7 @@ import android.view.View
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -66,6 +68,22 @@ class MainActivity : AppCompatActivity() {
     private lateinit var updateNotesText: TextView
     private var pendingUpdate: UpdateChecker.AppUpdate? = null
     private lateinit var previewController: VideoPreviewController
+
+    // Selection UI (bottom bar replaces the filter pill; toolbar shows "✕ N")
+    private lateinit var selectionBottomBar: View
+    private lateinit var filterPill: View
+    private lateinit var selectionTrashBtn: View
+
+    // Pending delete-from-device URIs; the system dialog resolves asynchronously on API 30+.
+    private var pendingDeleteIds: List<Long> = emptyList()
+    private var pendingDeleteAlsoServer: Boolean = false
+
+    private val deleteRequestLauncher =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                lifecycleScope.launch { finishDelete(pendingDeleteIds, pendingDeleteAlsoServer) }
+            }
+        }
 
     /** All scanned items (the chosen backup source). */
     private var allItems: List<MediaItem> = emptyList()
@@ -164,7 +182,20 @@ class MainActivity : AppCompatActivity() {
         ) { rows }
         previewController.onPreviewClick = ::openViewer
 
-        adapter = GalleryAdapter(onPhotoClick = ::openViewer)
+        selectionBottomBar = findViewById(R.id.selectionBottomBar)
+        filterPill = findViewById(R.id.filterPill)
+        selectionTrashBtn = findViewById(R.id.selectionTrash)
+        selectionTrashBtn.setOnClickListener {
+            confirmDelete(alsoServer = true)
+        }
+        findViewById<View>(R.id.selectionDeleteDevice).setOnClickListener {
+            confirmDelete(alsoServer = false)
+        }
+
+        adapter = GalleryAdapter(
+            onPhotoClick = ::openViewer,
+            onSelectionChanged = ::onSelectionChanged,
+        )
         layoutManager = GridLayoutManager(this, SPAN_COUNT).apply {
             spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int =
@@ -294,6 +325,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 true
             }
+            R.id.action_server_gallery -> {
+                openServerGallery()
+                true
+            }
             R.id.action_invite -> {
                 shareApp()
                 true
@@ -315,6 +350,30 @@ class MainActivity : AppCompatActivity() {
      * email…) with the install link, so people can spread PhotoSync the same
      * way they share everything else.
      */
+    private fun openServerGallery() {
+        val prefs = SyncPrefs(this)
+        if (prefs.serverUrl.isEmpty()) {
+            Toast.makeText(this, R.string.server_not_configured, Toast.LENGTH_LONG).show()
+            return
+        }
+        // Quick reachability check so the user gets feedback here rather than
+        // landing on a blank gallery screen with no explanation.
+        lifecycleScope.launch {
+            val reachable = withContext(Dispatchers.IO) {
+                ServerApi(prefs.serverUrl, prefs.apiKey, prefs.username).health(timeoutMs = 3000) != null
+            }
+            if (reachable) {
+                startActivity(Intent(this@MainActivity, ServerGalleryActivity::class.java))
+            } else {
+                Toast.makeText(
+                    this@MainActivity,
+                    R.string.server_gallery_offline_title,
+                    Toast.LENGTH_LONG,
+                ).show()
+            }
+        }
+    }
+
     private fun shareApp() {
         val share = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
@@ -501,6 +560,136 @@ class MainActivity : AppCompatActivity() {
     /** True if the configured server answers a health probe (short timeout). */
     private suspend fun serverReachable(): Boolean = withContext(Dispatchers.IO) {
         ServerApi(prefs.serverUrl, prefs.apiKey).health() != null
+    }
+
+    // ---- Selection + delete ------------------------------------------------
+
+    @Suppress("OVERRIDE_DEPRECATION")
+    override fun onBackPressed() {
+        if (adapter.selectionMode) {
+            adapter.exitSelectionMode()
+        } else {
+            @Suppress("DEPRECATION")
+            super.onBackPressed()
+        }
+    }
+
+    private var latestSelected: Set<Long> = emptySet()
+
+    private fun onSelectionChanged(selected: Set<Long>) {
+        latestSelected = selected
+        if (selected.isEmpty()) {
+            exitSelectionUi()
+        } else {
+            enterSelectionUi(selected.size)
+        }
+    }
+
+    private var selectionUiActive = false
+
+    private fun enterSelectionUi(count: Int) {
+        val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+        toolbar.title = getString(R.string.selection_count, count)
+
+        if (!selectionUiActive) {
+            selectionUiActive = true
+            selectionBottomBar.visibility = View.VISIBLE
+            filterPill.visibility = View.GONE
+            toolbar.logo = null
+            toolbar.setNavigationIcon(R.drawable.ic_close)
+            toolbar.setNavigationOnClickListener { adapter.exitSelectionMode() }
+
+            // Gray out Trash if server is not configured or unreachable.
+            val serverConfigured = prefs.serverUrl.isNotEmpty()
+            selectionTrashBtn.isEnabled = false
+            selectionTrashBtn.alpha = if (serverConfigured) 0.4f else 0.25f
+            if (serverConfigured) {
+                lifecycleScope.launch {
+                    val reachable = serverReachable()
+                    selectionTrashBtn.isEnabled = reachable
+                    selectionTrashBtn.alpha = if (reachable) 1f else 0.4f
+                }
+            }
+        }
+    }
+
+    private fun exitSelectionUi() {
+        selectionUiActive = false
+        selectionBottomBar.visibility = View.GONE
+        filterPill.visibility = View.VISIBLE
+        val toolbar = findViewById<com.google.android.material.appbar.MaterialToolbar>(R.id.toolbar)
+        toolbar.logo = ContextCompat.getDrawable(this, R.drawable.ic_launcher_foreground)
+        toolbar.navigationIcon = null
+        toolbar.title = getString(R.string.app_name)
+    }
+
+    private fun confirmDelete(alsoServer: Boolean) {
+        val selected = items.filter { it.id in latestSelected }
+        if (selected.isEmpty()) return
+        val title = if (alsoServer) R.string.delete_everywhere_confirm_title
+                    else R.string.delete_device_confirm_title
+        val msg   = if (alsoServer) R.string.delete_everywhere_confirm_msg
+                    else R.string.delete_device_confirm_msg
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(msg)
+            .setPositiveButton(R.string.delete_confirm_ok) { _, _ ->
+                executeDelete(selected.map { it.id }, alsoServer)
+            }
+            .setNegativeButton(R.string.delete_confirm_cancel, null)
+            .show()
+    }
+
+    private fun executeDelete(ids: List<Long>, alsoServer: Boolean) {
+        val uris = ids.mapNotNull { id -> items.find { it.id == id }?.uri }
+        pendingDeleteIds = ids
+        pendingDeleteAlsoServer = alsoServer
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val sender = android.provider.MediaStore.createDeleteRequest(contentResolver, uris)
+            deleteRequestLauncher.launch(IntentSenderRequest.Builder(sender).build())
+        } else {
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    for (uri in uris) {
+                        try { contentResolver.delete(uri, null, null) }
+                        catch (_: Exception) { /* best-effort */ }
+                    }
+                }
+                finishDelete(ids, alsoServer)
+            }
+        }
+    }
+
+    private suspend fun finishDelete(ids: List<Long>, alsoServer: Boolean) {
+        val log = UploadLog.get(this)
+
+        // Collect hashes before removing from log
+        val hashes = if (alsoServer) {
+            withContext(Dispatchers.IO) { ids.mapNotNull { log.hashForMediaId(it) } }
+        } else emptyList()
+
+        // Remove from upload log
+        withContext(Dispatchers.IO) { ids.forEach { log.deleteByMediaId(it) } }
+
+        // Delete from server (best-effort; local delete already happened)
+        if (alsoServer && hashes.isNotEmpty() && prefs.serverUrl.isNotEmpty()) {
+            val api = ServerApi(prefs.serverUrl, prefs.apiKey, prefs.username)
+            var serverError: String? = null
+            withContext(Dispatchers.IO) {
+                for (hash in hashes) {
+                    try { api.deleteFile(hash) }
+                    catch (e: Exception) { serverError = e.message }
+                }
+            }
+            if (serverError != null) {
+                Toast.makeText(this, getString(R.string.delete_server_error, serverError), Toast.LENGTH_LONG).show()
+            }
+        }
+
+        adapter.exitSelectionMode()
+        Toast.makeText(this, getString(R.string.delete_done, ids.size), Toast.LENGTH_SHORT).show()
+        refresh()
     }
 
     /** Drives the date pill and the video preview together. */

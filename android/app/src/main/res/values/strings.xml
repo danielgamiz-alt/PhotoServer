@@ -92,6 +92,39 @@
     <string name="status_uploading">Uploading…</string>
     <string name="status_pending">Not backed up yet</string>
 
+    <string name="menu_server_gallery">Browse server photos</string>
+    <string name="menu_reindex">Scan for new files</string>
+    <string name="reindex_scanning">Scanning for new files…</string>
+    <string name="reindex_done_new">Found %1$d new file(s)</string>
+    <string name="reindex_done_none">No new files found</string>
+    <string name="server_gallery_title">Photos on server</string>
+    <string name="server_gallery_offline_title">Can\'t reach the server</string>
+    <string name="server_gallery_offline_detail">Make sure you\'re on your home Wi‑Fi and the PhotoSync Server app is running on your PC.</string>
+    <string name="server_gallery_empty">No photos stored on the server yet</string>
+    <string name="server_gallery_error">Could not load photos: %1$s</string>
+    <string name="downloading">Saving to camera roll…</string>
+    <string name="download_complete">Saved to camera roll</string>
+    <string name="download_failed">Download failed: %1$s</string>
+    <string name="on_device">Already on this phone</string>
+    <string name="download">Download to device</string>
+    <string name="server_not_configured">Set up your server in Settings first</string>
+
+    <!-- Selection / delete -->
+    <string name="selection_cancel">Cancel selection</string>
+    <string name="selection_count">%1$d selected</string>
+    <string name="action_trash">Trash</string>
+    <string name="action_delete_device">Delete from device</string>
+    <string name="delete_from_device">Delete from device</string>
+    <string name="delete_everywhere">Delete everywhere</string>
+    <string name="delete_device_confirm_title">Delete from device?</string>
+    <string name="delete_device_confirm_msg">The selected photo(s) will be removed from this phone. Your server backup will not be affected.</string>
+    <string name="delete_everywhere_confirm_title">Trash selected photos?</string>
+    <string name="delete_everywhere_confirm_msg">The selected photo(s) will be permanently deleted from this phone AND from your server. This cannot be undone.</string>
+    <string name="delete_confirm_ok">Delete</string>
+    <string name="delete_confirm_cancel">Cancel</string>
+    <string name="delete_done">Deleted %1$d item(s)</string>
+    <string name="delete_server_error">Deleted from device. Could not reach server: %1$s</string>
+
     <string name="back">Back</string>
     <string name="photo">Photo</string>
     <string name="play_video">Play video</string>
@@ -151,6 +184,12 @@
 
     <string name="help_q_missing">Why haven\'t my latest photos backed up yet?</string>
     <string name="help_a_missing">Check that you\'re on your home Wi‑Fi and the computer is on. Backups run periodically and resume on their own — pull down on the gallery to refresh, or use \"Sync now\".</string>
+
+    <string name="help_q_delete">Can I delete a photo from both my phone and the server at once?</string>
+    <string name="help_a_delete">Yes — long-press any photo in the gallery to enter selection mode, then tap <b>Trash</b>. This removes it from your phone and tells the server to delete its copy too.\n\nThe Trash button requires an active connection to your server (same home Wi‑Fi, server app running). If the server is unreachable the button will be grayed out — in that case you can still use <b>Delete from device</b> to remove the local copy, but the server copy will remain. There is currently no automatic retry, so if you delete while offline the server copy will not be cleaned up later.</string>
+
+    <string name="help_q_manual">Can I add photos to the server manually?</string>
+    <string name="help_a_manual">Yes. PhotoSync Server stores photos as plain files on your PC, organised in folders by user and date — for example PhotoSync\Alex\2026\06\photo.jpg. You can copy any photo or video into that folder structure yourself and the server will serve it normally.\n\nThe one extra step: the server keeps an index of known files to avoid duplicates during upload. Files copied in manually aren\'t in that index yet, so they won\'t appear in \"Photos on server\" until you scan for them. To do that, open the PhotoSync Server app on your PC, go to Settings, and click Scan for new files. The scan is instant and safe to run repeatedly — it only adds what isn\'t already indexed.\n\nFolder layout: create a subfolder named after the person (Alex, Maria…) inside the backup folder, then year and month subfolders inside that. Example: PhotoSync\Alex\2026\06\IMG_1234.jpg. If you skip the person\'s name folder, files land under the default account instead.</string>
 
     <string name="help_q_free">Is it really free?</string>
     <string name="help_a_free">Yes. PhotoSync is free and open source, and because the storage is your own computer there\'s no subscription and no limit beyond your own drive. It\'s built by one person on evenings and weekends — if it\'s useful to you, a small tip helps keep it going (entirely optional).</string>

@@ -34,6 +34,15 @@ class UploadLog private constructor(context: Context) :
         return ids
     }
 
+    /** SHA-256 hashes of every file that has been uploaded (or confirmed on the server). */
+    fun uploadedHashes(): Set<String> {
+        val hashes = HashSet<String>()
+        readableDatabase.rawQuery("SELECT hash FROM uploaded", null).use { cursor ->
+            while (cursor.moveToNext()) hashes.add(cursor.getString(0))
+        }
+        return hashes
+    }
+
     fun markUploaded(mediaId: Long, hash: String) {
         val values = ContentValues().apply {
             put("media_id", mediaId)
@@ -49,6 +58,18 @@ class UploadLog private constructor(context: Context) :
         readableDatabase.rawQuery("SELECT COUNT(*) FROM uploaded", null).use { cursor ->
             return if (cursor.moveToFirst()) cursor.getLong(0) else 0
         }
+    }
+
+    /** Returns the stored hash for a MediaStore item, or null if not uploaded. */
+    fun hashForMediaId(mediaId: Long): String? {
+        readableDatabase.rawQuery(
+            "SELECT hash FROM uploaded WHERE media_id = ?", arrayOf(mediaId.toString())
+        ).use { c -> return if (c.moveToFirst()) c.getString(0) else null }
+    }
+
+    /** Removes the upload record for a single MediaStore item. */
+    fun deleteByMediaId(mediaId: Long) {
+        writableDatabase.delete("uploaded", "media_id = ?", arrayOf(mediaId.toString()))
     }
 
     /**

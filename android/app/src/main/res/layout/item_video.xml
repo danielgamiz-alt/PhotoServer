@@ -50,4 +50,13 @@
         android:background="@drawable/badge_bg"
         android:padding="3dp" />
 
+    <ImageView
+        android:id="@+id/selectionCircle"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="top|start"
+        android:layout_margin="6dp"
+        android:importantForAccessibility="no"
+        android:visibility="gone" />
+
 </FrameLayout>
