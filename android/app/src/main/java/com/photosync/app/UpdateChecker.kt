@@ -19,7 +19,7 @@ object UpdateChecker {
 
     /** Where the release pipeline publishes the manifest (stable "latest" URL). */
     private const val LATEST_URL =
-        "https://github.com/danielgamiz-alt/PhotoServer/releases/latest/download/latest.json"
+        "https://github.com/danielgamiz-alt/PhotoSync/releases/latest/download/latest.json"
 
     /** A newer app build, parsed from latest.json. */
     data class AppUpdate(

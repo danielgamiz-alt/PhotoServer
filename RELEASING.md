@@ -43,11 +43,11 @@ leave your machine.
 
 ### 3. Put the code on GitHub
 
-Create a new repository on github.com (e.g. `PhotoServer`), then from the
+Create a new repository on github.com (e.g. `PhotoSync`), then from the
 project root:
 
 ```
-git remote add origin https://github.com/danielgamiz-alt/PhotoServer.git
+git remote add origin https://github.com/danielgamiz-alt/PhotoSync.git
 git push -u origin master
 ```
 

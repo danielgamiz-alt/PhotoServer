@@ -10,9 +10,9 @@
 AppName=PhotoSync Server
 AppVersion={#AppVersion}
 AppPublisher=Daniel Gamiz
-AppPublisherURL=https://danielgamiz-alt.github.io/PhotoServer/
-AppSupportURL=https://github.com/danielgamiz-alt/PhotoServer
-AppUpdatesURL=https://github.com/danielgamiz-alt/PhotoServer/releases
+AppPublisherURL=https://danielgamiz-alt.github.io/PhotoSync/
+AppSupportURL=https://github.com/danielgamiz-alt/PhotoSync
+AppUpdatesURL=https://github.com/danielgamiz-alt/PhotoSync/releases
 
 ; Install to %LocalAppData%\PhotoSync Server — no admin prompt needed.
 DefaultDirName={localappdata}\PhotoSync Server

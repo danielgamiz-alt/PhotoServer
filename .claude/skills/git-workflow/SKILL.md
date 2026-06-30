@@ -1,7 +1,7 @@
 ---
 name: git-workflow
 description: >-
-  Git and GitHub conventions for the PhotoServer repo on this Windows machine.
+  Git and GitHub conventions for the PhotoSync repo on this Windows machine.
   Use this whenever committing, pushing, opening or updating a pull request, or
   running any `gh` command here — it records the non-obvious local setup (where
   the GitHub CLI actually lives, the base branch, the required commit/PR
@@ -9,7 +9,7 @@ description: >-
   them every time. Consult it before reaching for `gh` or crafting a commit.
 ---
 
-# Git & GitHub workflow (PhotoServer)
+# Git & GitHub workflow (PhotoSync)
 
 This repo is on a Windows machine with a couple of local quirks. Following the
 notes below avoids the usual dead ends (a "gh: command not found", a PR opened
@@ -29,7 +29,7 @@ CLI` to PATH — but don't do that unless asked; the full path is reliable.)
 
 ## Repo facts
 
-- Remote repo: `danielgamiz-alt/PhotoServer`
+- Remote repo: `danielgamiz-alt/PhotoSync`
 - **Base branch for PRs is `master`** (not `main`). Pass `--base master` explicitly.
 - Feature work happens on branches; push the current branch and PR it into `master`.
 

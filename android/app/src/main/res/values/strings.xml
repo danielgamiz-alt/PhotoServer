@@ -41,7 +41,7 @@
     <string name="menu_setup_computer">Set up the computer</string>
 
     <!-- Sharing / virality -->
-    <string name="landing_url" translatable="false">https://danielgamiz-alt.github.io/PhotoServer/</string>
+    <string name="landing_url" translatable="false">https://danielgamiz-alt.github.io/PhotoSync/</string>
     <string name="invite_subject">Try PhotoSync — free photo backup</string>
     <string name="invite_text">I\'m using PhotoSync to back up my phone\'s photos to my own computer — free, private, no cloud subscription. You can set it up here:\n\n%1$s</string>
     <string name="invite_chooser">Invite a friend to PhotoSync</string>

@@ -8,7 +8,7 @@ Phone (PhotoSync app)  ──WiFi──►  Home PC (PhotoSync Server)  ──�
 
 ## Download
 
-**[danielgamiz-alt.github.io/PhotoServer](https://danielgamiz-alt.github.io/PhotoServer/)** — download page with step-by-step setup for both apps.
+**[danielgamiz-alt.github.io/PhotoSync](https://danielgamiz-alt.github.io/PhotoSync/)** — download page with step-by-step setup for both apps.
 
 | Download | Platform |
 |---|---|
