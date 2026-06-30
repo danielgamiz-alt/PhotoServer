@@ -7,7 +7,7 @@ const path = require('path');
 // "Start on login" is implemented with the per-user Windows registry Run key.
 // This is user-level (no admin needed) and fully reversible.
 const RUN_KEY = 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run';
-const VALUE_NAME = 'PhotoServer';
+const VALUE_NAME = 'PhotoSync Server';
 
 function run(args) {
   return new Promise((resolve) => {
@@ -19,11 +19,11 @@ function run(args) {
 
 /** The command Windows should run at login (start hidden in the tray). */
 function launchCommand() {
-  // Portable build: PhotoServer.exe sits next to the bundled node.exe
+  // Portable build: PhotoSync Server.exe sits next to the bundled node.exe
   // (process.execPath). Launch through it — it's a windowed exe, so login
   // start is silent (no console window flashing). Running node.exe directly
   // would flash a console.
-  const launcher = path.join(path.dirname(process.execPath), 'PhotoServer.exe');
+  const launcher = path.join(path.dirname(process.execPath), 'PhotoSync Server.exe');
   if (fs.existsSync(launcher)) {
     return `"${launcher}" --minimized`;
   }
@@ -39,6 +39,16 @@ function launchCommand() {
   const cmd = `"${process.execPath}" "${main}" --minimized`.replace(/"/g, '""');
   fs.writeFileSync(vbs, `CreateObject("WScript.Shell").Run "${cmd}", 0, False\r\n`);
   return `wscript.exe "${vbs}"`;
+}
+
+// Renames the old 'PhotoServer' registry entry to 'PhotoSync Server' so
+// existing installs keep autostart after the rename without user action.
+async function migrate() {
+  const OLD = 'PhotoServer';
+  const { ok } = await run(['query', RUN_KEY, '/v', OLD]);
+  if (!ok) return; // nothing to migrate
+  await enable();                                    // write new key
+  await run(['delete', RUN_KEY, '/v', OLD, '/f']);   // remove old key
 }
 
 async function isEnabled() {
@@ -58,4 +68,4 @@ async function set(enabled) {
   return enabled ? enable() : disable();
 }
 
-module.exports = { isEnabled, enable, disable, set, launchCommand };
+module.exports = { isEnabled, enable, disable, set, launchCommand, migrate };

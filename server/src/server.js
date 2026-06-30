@@ -9,11 +9,11 @@ const EventEmitter = require('events');
 const { Storage, sanitizeUsername, isVideoName } = require('./storage');
 const discovery = require('./discovery');
 
-const VERSION = '0.1.0';
+const VERSION = '0.6.0';
 const MAX_CHECK_BODY = 5 * 1024 * 1024; // 5 MB of JSON hashes is plenty
 
 /**
- * The PhotoServer as a controllable, event-emitting object so it can be driven
+ * PhotoSync Server as a controllable, event-emitting object so it can be driven
  * both by the headless CLI (src/index.js) and the desktop tray app.
  *
  * Events:

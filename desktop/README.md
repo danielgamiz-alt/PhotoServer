@@ -1,6 +1,6 @@
-# PhotoServer Desktop (Windows tray app)
+# PhotoSync Server Desktop (Windows tray app)
 
-A friendly wrapper around the [PhotoServer backend](../server) so you don't have
+A friendly wrapper around the [PhotoSync Server backend](../server) so you don't have
 to keep a terminal window open. It runs the server in the background, shows a
 **system-tray icon**, and gives you a **dashboard** in your browser to pick the
 backup folder, see status, and change settings.
@@ -11,7 +11,7 @@ backup folder, see status, and change settings.
 
 **End users don't run it from source.** They download the portable
 `PhotoSync-Server-Windows-*.zip` from the GitHub Release, extract it, and
-double-click `PhotoServer.exe` — no Node, no install. See
+double-click `PhotoSync Server.exe` — no Node, no install. See
 [RELEASING.md](../RELEASING.md) and `npm run package` below.
 
 For development:
@@ -91,10 +91,10 @@ npm run package
 ```
 
 Runs [`build-portable.ps1`](build-portable.ps1), which produces a self-contained
-folder at `dist/PhotoServer/` — a windowed `PhotoServer.exe` launcher, a bundled
+folder at `dist/PhotoSync Server/` — a windowed `PhotoSync Server.exe` launcher, a bundled
 `node.exe`, the server + dashboard, and the tray/notifier helpers — plus a
-zipped `dist/PhotoServer-Windows.zip` to hand out. Recipients extract it and
-double-click `PhotoServer.exe`; **no Node install, no admin**. The release
+zipped `dist/PhotoSync Server-Windows.zip` to hand out. Recipients extract it and
+double-click `PhotoSync Server.exe`; **no Node install, no admin**. The release
 workflow runs this on a Windows runner and attaches the zip to each GitHub
 Release (see [RELEASING.md](../RELEASING.md)).
 

@@ -91,7 +91,7 @@ GitHub Actions then builds the downloads and attaches them to one Release:
   also attached as a fixed-named `PhotoSync.apk` so the landing page and the
   in-app updater can link to a stable `…/releases/latest/download/PhotoSync.apk`.
 - `PhotoSync-Server-Windows-v0.2.0.zip` — the portable Windows server: a
-  self-contained folder (bundled Node + `PhotoServer.exe`) that family extract
+  self-contained folder (bundled Node + `PhotoSync Server.exe`) that family extract
   and double-click, no install or Node needed (the `windows-server` job). Also
   attached fixed-named as `PhotoSync-Server-Windows.zip`.
 - `latest.json` — a small manifest (version, download URL, and a "what's new"
@@ -127,7 +127,7 @@ PhotoSync needs **two** things set up, and the computer comes first:
 1. On the household Windows PC, open the release page and download
    `PhotoSync-Server-Windows-….zip`.
 2. Right-click the zip → **Extract All**, keep the folder together (e.g. in
-   Documents), and double-click **PhotoServer**.
+   Documents), and double-click **PhotoSync Server**.
 3. If Windows shows *"Windows protected your PC"*, click **More info → Run
    anyway** (normal for free apps outside the Store).
 4. In the dashboard that opens, click **Browse…** and pick where photos are

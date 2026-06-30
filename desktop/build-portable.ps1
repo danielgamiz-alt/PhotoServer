@@ -1,15 +1,15 @@
-# Builds a portable PhotoServer: a self-contained folder with PhotoServer.exe
-# you double-click. No install, no admin. Output: desktop/dist/PhotoServer/
+# Builds a portable PhotoSync Server: a self-contained folder with PhotoSync Server.exe
+# you double-click. No install, no admin. Output: desktop/dist/PhotoSync Server/
 #
 # Usage:  npm run package      (from the desktop folder)
 
 $ErrorActionPreference = "Stop"
 $desktop = $PSScriptRoot
 $root = Split-Path $desktop -Parent          # repo root (has server/ + desktop/)
-$dist = Join-Path $desktop "dist\PhotoServer"
+$dist = Join-Path $desktop "dist\PhotoSync Server"
 $csc = "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
 
-Write-Host "Building portable PhotoServer..." -ForegroundColor Cyan
+Write-Host "Building portable PhotoSync Server..." -ForegroundColor Cyan
 
 # 1. Fresh dist folder
 if (Test-Path $dist) { Remove-Item $dist -Recurse -Force }
@@ -18,8 +18,8 @@ New-Item -ItemType Directory -Force $dist | Out-Null
 # 2. Make sure icons exist
 node (Join-Path $desktop "assets\generate-icons.js") | Out-Null
 
-# 3. Compile the launcher -> PhotoServer.exe (windowed, with our icon)
-$exePath = Join-Path $dist "PhotoServer.exe"
+# 3. Compile the launcher -> PhotoSync Server.exe (windowed, with our icon)
+$exePath = Join-Path $dist "PhotoSync Server.exe"
 $iconPath = Join-Path $desktop "assets\app.ico"
 $srcPath = Join-Path $desktop "packaging\launcher.cs"
 & $csc /nologo /target:winexe "/out:$exePath" "/win32icon:$iconPath" `
@@ -69,7 +69,7 @@ PhotoSync Server (for your computer)
 SETUP (one time, about a minute):
  1. Keep this whole folder together (for example in Documents). Don't run it
     from inside the .zip.
- 2. Double-click PhotoServer.exe.
+ 2. Double-click PhotoSync Server.exe.
     - If Windows shows a blue "Windows protected your PC" box, click
       "More info" then "Run anyway". (Normal for free apps not from the Store.)
  3. A dashboard opens in your browser and a green icon appears by the clock
@@ -88,8 +88,8 @@ $size = [math]::Round((Get-ChildItem $dist -Recurse | Measure-Object Length -Sum
 Write-Host "Done -> $dist  (${size} MB)" -ForegroundColor Green
 
 # 8. Zip it up — a single file to hand to family (extract, double-click).
-#    The archive contains a top-level PhotoServer\ folder so extraction is tidy.
-$zip = Join-Path (Split-Path $dist -Parent) "PhotoServer-Windows.zip"
+#    The archive contains a top-level PhotoSync Server\ folder so extraction is tidy.
+$zip = Join-Path (Split-Path $dist -Parent) "PhotoSync Server-Windows.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Compress-Archive -Path $dist -DestinationPath $zip
 Write-Host "Zipped -> $zip" -ForegroundColor Green

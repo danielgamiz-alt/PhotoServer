@@ -1,4 +1,4 @@
-# PhotoServer
+# PhotoSync Server
 
 A free, self-hosted alternative to Google Photos backup. Your phone automatically
 uploads new photos and videos to your own computer whenever it's on the same WiFi
@@ -8,7 +8,7 @@ external SSD, whatever you point it at.
 ```
 ┌──────────┐   WiFi    ┌─────────────────────┐
 │  Phone    │ ────────► │   Home computer      │
-│ PhotoSync │  uploads  │  PhotoServer (Node)  │──► E:\PhotoBackup\2026\06\IMG_001.jpg
+│ PhotoSync │  uploads  │ PhotoSync Server (Node) │──► E:\PhotoBackup\2026\06\IMG_001.jpg
 └──────────┘           └─────────────────────┘
 ```
 
@@ -31,7 +31,7 @@ No terminal, no Node.js, no install wizard. Two double-clicks and you're done:
 **On the home PC (set up once, ~1 minute):**
 
 1. Download **PhotoSync Server for Windows** (the `.zip`) from the page above and **Extract All**.
-2. Double-click **`PhotoServer.exe`**. (First time, Windows SmartScreen → *More info → Run anyway* — normal for free apps outside the Store.)
+2. Double-click **`PhotoSync Server.exe`**. (First time, Windows SmartScreen → *More info → Run anyway* — normal for free apps outside the Store.)
 3. A dashboard opens and a green tray icon appears by the clock. Click **Browse…** and pick where photos should go (an external drive is ideal).
 
 That's it — it then **starts on its own every time the PC turns on**. No terminal stays open.
@@ -55,7 +55,7 @@ That's it — it then **starts on its own every time the PC turns on**. No termi
 
 ---
 
-# Part 1 — The server (backend)
+# Part 1 — PhotoSync Server (backend)
 
 > Everyday users should use the [one-click Windows app](#download--install--the-easy-way)
 > above instead — it runs everything below for you. This section is for running the
@@ -75,7 +75,7 @@ On Windows you can instead just double-click [`server/start-server.bat`](server/
 When it starts it prints something like:
 
 ```
-PhotoServer v0.1.0 "Living room PC"
+PhotoSync Server v0.1.0 "Living room PC"
 Storing photos in: E:\PhotoBackup (0 files indexed)
 API key required: no
 Listening on:

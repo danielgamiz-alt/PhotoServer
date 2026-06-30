@@ -8,10 +8,10 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-// Returns the path to PhotoServer.exe when running inside the portable build,
+// Returns the path to PhotoSync Server.exe when running inside the portable build,
 // or null in dev mode (no shortcut makes sense without a stable exe location).
 function launcherExe() {
-  const candidate = path.join(path.dirname(process.execPath), 'PhotoServer.exe');
+  const candidate = path.join(path.dirname(process.execPath), 'PhotoSync Server.exe');
   return fs.existsSync(candidate) ? candidate : null;
 }
 
