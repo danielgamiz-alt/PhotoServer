@@ -21,6 +21,7 @@ Phone (PhotoSync app)  ──WiFi──►  Home PC (PhotoSync Server)  ──�
 - Sends SHA-256 hashes of new photos; server replies with which ones are missing.
 - Uploads only new files. No duplicates, even after interrupted syncs or renames.
 - Files land in `<storage>/<year>/<month>/` by capture date.
+- The **server gallery** tab in the app lets you browse, view, download, and delete photos stored on the server.
 
 ---
 
@@ -103,6 +104,5 @@ All endpoints except `/api/health` require `x-api-key` header if `apiKey` is con
 ## Roadmap
 
 - "Free up space" — delete local copies of safely backed-up photos
-- Web gallery to browse by timeline
 - Access from outside home via Tailscale
 - iOS app
