@@ -106,3 +106,7 @@ All endpoints except `/api/health` require `x-api-key` header if `apiKey` is con
 - "Free up space" — delete local copies of safely backed-up photos
 - Access from outside home via Tailscale
 - iOS app
+
+## License
+
+MIT — see [LICENSE](LICENSE).
