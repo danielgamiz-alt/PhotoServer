@@ -152,6 +152,16 @@ async function main() {
     const thumbRes = await fetch(`${BASE}/media/thumb?hash=${h1}`);
     check('thumb: 200', thumbRes.status === 200);
 
+    // blur placeholder: a tiny JPEG when sharp is present, a graceful 404 when
+    // it isn't (the gallery simply shows no placeholder in that case).
+    let hasSharp = true;
+    try { require('sharp'); } catch { hasSharp = false; }
+    const blurRes = await fetch(`${BASE}/media/blur?hash=${h1}`);
+    check('blur: served or gracefully absent', blurRes.status === (hasSharp ? 200 : 404), `got ${blurRes.status}`);
+    if (hasSharp) check('blur: is jpeg', (blurRes.headers.get('content-type') || '').includes('jpeg'));
+    const blurMissing = await fetch(`${BASE}/media/blur?hash=deadbeef`);
+    check('blur: missing → 404', blurMissing.status === 404);
+
     // missing hash
     const missing = await fetch(`${BASE}/media/file?hash=deadbeef`);
     check('file: missing → 404', missing.status === 404);
