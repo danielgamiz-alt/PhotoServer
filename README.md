@@ -8,7 +8,7 @@ Phone (PhotoSync app)  ──WiFi──►  Home PC (PhotoSync Server)  ──�
 
 ## Download
 
-**[danielgamiz-alt.github.io/PhotoServer](https://danielgamiz-alt.github.io/PhotoServer/)** — download page with step-by-step setup for both apps.
+**[danielgamiz-alt.github.io/PhotoSync](https://danielgamiz-alt.github.io/PhotoSync/)** — download page with step-by-step setup for both apps.
 
 | Download | Platform |
 |---|---|
@@ -106,3 +106,7 @@ All endpoints except `/api/health` require `x-api-key` header if `apiKey` is con
 - "Free up space" — delete local copies of safely backed-up photos
 - Access from outside home via Tailscale
 - iOS app
+
+## License
+
+MIT — see [LICENSE](LICENSE).

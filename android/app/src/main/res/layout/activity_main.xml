@@ -12,7 +12,7 @@
         app:logo="@drawable/ic_launcher_foreground"
         app:logoScaleType="fitCenter"
         app:title="@string/app_name"
-        app:titleTextAppearance="?attr/textAppearanceTitleLarge" />
+        app:titleTextAppearance="@style/TextAppearance.PhotoSync.Toolbar" />
 
     <!-- Summary bar: backup status on the left, a persistent "Set up backup"
          CTA on the right that stays visible until the server + name are set. -->
@@ -40,7 +40,21 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceTitleMedium"
                 android:textColor="@color/text_primary"
+                android:textSize="15sp"
                 android:textStyle="bold" />
+
+            <!-- One-line reassurance under the headline: green "all safe" when
+                 everything is backed up, gray "continues on Wi‑Fi" while
+                 uploading. Hidden in the unreachable / not-set-up states. -->
+            <TextView
+                android:id="@+id/summarySubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:textColor="@color/success"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <ProgressBar
                 android:id="@+id/summaryProgress"

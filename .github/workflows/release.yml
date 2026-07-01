@@ -94,7 +94,7 @@ jobs:
             --argjson appcode "${{ github.run_number }}" \
             --arg ver "${{ steps.ver.outputs.name }}" \
             --arg apk "${REPO_URL}/releases/latest/download/PhotoSync.apk" \
-            --arg site "https://danielgamiz-alt.github.io/PhotoServer/" \
+            --arg site "https://danielgamiz-alt.github.io/PhotoSync/" \
             --arg notes "${REPO_URL}/releases/latest" \
             --argjson list "$NOTES_JSON" \
             '{app:{versionCode:$appcode,versionName:$ver,url:$apk,notesUrl:$notes,notes:$list},

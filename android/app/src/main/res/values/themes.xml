@@ -17,6 +17,14 @@
         <item name="android:navigationBarColor">@color/bg</item>
     </style>
 
+    <!-- Toolbar title: bold and a touch larger so "PhotoSync" holds its own
+         next to the app icon logo (the default TitleLarge looked light/small). -->
+    <style name="TextAppearance.PhotoSync.Toolbar" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
     <!-- Full-screen, pure-black, no action bar for the photo viewer. -->
     <style name="Theme.PhotoSync.Viewer" parent="Theme.Material3.Dark.NoActionBar">
         <item name="android:windowBackground">@android:color/black</item>
